@@ -27,6 +27,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # The vendored shared stylesheet must match the hash pinned when it was last re-vendored.
+      - run: bash scripts/check-ui-standard.sh
   doctor:
     runs-on: ubuntu-latest
     steps:
@@ -75,6 +77,7 @@ jobs:
   browser:
     # Drives the real UI (cookie, four admin changes, diagram, 375px) against the built app on a spare port.
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -83,10 +86,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: cache the Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-1.64.1-chromium-${{ runner.os }}
+      # Run 41207830794 hung for 11+ minutes here: the chromium download reaches 100% and then playwright 1.49.1's installer never
+      # exits on Node 26. A current playwright installs cleanly. No --with-deps (apt): the runner image has chromium's libraries.
       - name: install Playwright outside the repo
+        timeout-minutes: 5
         run: |
-          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw" && npm init -y >/dev/null && npm i playwright@1.49.1 && npx playwright install --with-deps chromium
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw" && npm init -y >/dev/null && npm i playwright@1.64.1 && npx playwright install chromium
       - name: e2e
+        timeout-minutes: 5
         run: |
           PORT=6898 node server/src/index.js > "$RUNNER_TEMP/server.log" 2>&1 &
           SRV=$!
