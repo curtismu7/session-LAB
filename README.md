@@ -4,7 +4,7 @@ How PingOne and DaVinci sessions and cookies work, and how an admin change to th
 
 Tier: Demo
 Repo: https://github.com/ping-sandbox/session-LAB
-Catalog: none. No row in the catalog matches this app yet (A22 is a different, Tester-kind app; D40, which an earlier draft used, is a retired row for something else). The owner must pick or add a row. Until then `content-pack.json` has no `demo.catalog` and the Learning Hub validator reports that one missing field.
+Catalog: A30 (accepted by the owner, 2026-10-31; defined in the shelf catalog of cmuir_pingcorp/demo-shelf).
 
 ## What is simulated
 
