@@ -1,0 +1,28 @@
+{
+  "name": "session-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "How PingOne and DaVinci sessions and cookies work: a mock session, its cookie, the DaVinci sessionToken and the tokens apps hold, with admin changes (revoke, idle timeout, mfa step-up, sessionToken reuse) and their effect on apps. Mock only: no tenant, no outbound network.",
+  "license": "MIT",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "start": "npm start -w server",
+    "test": "npm test -w server && npm test -w web && node --test scripts/*.test.mjs",
+    "build": "npm run build -w web",
+    "doctor": "node scripts/doctor.mjs",
+    "e2e": "node e2e/session-lab.e2e.mjs",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "reset": "node scripts/reset.mjs",
+    "content-pack": "node scripts/build-content-pack.mjs && node scripts/validate-content-pack.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0"
+  }
+}

@@ -1,0 +1,258 @@
+{
+  "schema": "demo-content-pack/1",
+  "id": "session-lab",
+  "title": "PingOne and DaVinci sessions and cookies",
+  "version": "0.1.0",
+  "demo": {
+    "id": "session-lab",
+    "name": "Session Lab",
+    "baseUrl": "http://localhost:6880",
+    "doctor": "/api/health",
+    "tags": [
+      "session",
+      "cookie",
+      "pingone",
+      "davinci",
+      "step-up",
+      "mock-only"
+    ]
+  },
+  "glossary": [
+    {
+      "id": "pingone-session",
+      "term": "PingOne session",
+      "definition": "The record PingOne keeps that a person authenticated: when, how (pwd, mfa) and when it was last used. Apps do not hold it. It is separate from every token an app holds. Per Ping's docs the default idle timeout is 30 days; a shorter value (in minutes) is set on the Return Success Response node. The owner-supplied write-up adds that each Return Success Response pushes the idle window out.",
+      "aliases": [
+        "SSO session"
+      ]
+    },
+    {
+      "id": "session-cookie",
+      "term": "Session cookie",
+      "definition": "A browser cookie set by the identity service on its own origin that points at the session. The page cannot read it (HttpOnly). Ping's session write-up calls the real one the \"ST cookie\"; its flags are unsourced and this lab uses a labelled mock name.",
+      "aliases": [
+        "ST cookie"
+      ]
+    },
+    {
+      "id": "session-token",
+      "term": "DaVinci sessionToken",
+      "definition": "A token a DaVinci flow returns so a widget can reuse an existing session by posting it back as global.sessionToken. It is not the browser cookie and not an OIDC token.",
+      "aliases": [
+        "global.sessionToken"
+      ]
+    },
+    {
+      "id": "idle-timeout",
+      "term": "Idle timeout",
+      "definition": "How long a session can sit unused before it ends. Whether a change applies to sessions that already exist is UNVERIFIED."
+    },
+    {
+      "id": "mfa-recency",
+      "term": "MFA recency (step-up)",
+      "definition": "Check Session requires one method signed on within a window (Ping's write-up uses 8 or 9 hours). It reads that method's own last sign-on time on the session. The values on Return Success Response are records, not challenges.",
+      "aliases": [
+        "step-up"
+      ]
+    },
+    {
+      "id": "authentication-methods",
+      "term": "Authentication Methods",
+      "definition": "Values a flow sets on Return Success Response to say how the user signed on: pwd (the default), mfa, otp, sms, rba, or custom values such as fido and pwdless. PingOne does not detect them. Each one gets its own last sign-on time on the session.",
+      "aliases": [
+        "amr",
+        "pwd",
+        "mfa"
+      ]
+    },
+    {
+      "id": "sticky-sso",
+      "term": "Sticky SSO",
+      "definition": "What happens when a flow reports a method that never ran (for example always sending mfa). That method's last sign-on moves to now with no login, so Check Session keeps passing. A flow that authenticated nobody should report no methods.",
+      "aliases": [
+        "false mfa"
+      ]
+    },
+    {
+      "id": "revoke",
+      "term": "Revoke (delete vs soft delete)",
+      "definition": "Per the owner-supplied guide, Delete Session signs the user out and Soft Delete keeps the session record. Tokens an app already holds are separate credentials and are not recalled by it."
+    }
+  ],
+  "sources": [
+    {
+      "id": "p1-auth-connector",
+      "title": "PingOne Authentication connector (DaVinci)",
+      "url": "https://docs.pingidentity.com/connectors/p1_authentication_connector.html",
+      "kind": "vendor-doc",
+      "use": "Check Session, Create or Update Session, Delete Session and Return Success Response fields; Authentication Methods values.",
+      "status": "read",
+      "checked": "2026-10-27"
+    },
+    {
+      "id": "p1-oidc-app",
+      "title": "Editing an application, OIDC (PingOne)",
+      "url": "https://docs.pingidentity.com/pingone/applications/p1_edit_application_oidc.html",
+      "kind": "vendor-doc",
+      "use": "Default 30-day idle timeout, OIDC session management, refresh token durations, idpSignoff.",
+      "status": "read",
+      "checked": "2026-10-27"
+    },
+    {
+      "id": "guide",
+      "title": "How sessions work in PingOne and DaVinci (PDF supplied by the owner; no public URL, it cites the two pages above)",
+      "url": "https://docs.pingidentity.com/connectors/p1_authentication_connector.html",
+      "kind": "vendor-doc",
+      "use": "Session facts (also: the owner write-up on Return Success Response, not public): 30 day idle default, pwd/mfa records, Check Session, sessionToken reuse, Delete vs Soft Delete.",
+      "status": "read",
+      "checked": "2026-10-27"
+    }
+  ],
+  "cards": [
+    {
+      "id": "try-step-1",
+      "label": "Step 1: Sign in once",
+      "description": "the member signs in through a DaVinci flow. Return Success Response creates the PingOne session and the browser receives a session cookie. The session is the signed-in state PingOne keeps. It is not a token.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "pingone-session",
+        "session-cookie",
+        "authentication-methods"
+      ],
+      "story": "S01"
+    },
+    {
+      "id": "try-step-2",
+      "label": "Step 2: A second app, no prompt",
+      "description": "the member portal sends the browser to PingOne. The browser sends the cookie, PingOne recognises the session and issues tokens without asking for a password. That is single sign-on. The cookie is only for PingOne; it never goes to the app.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "session-cookie"
+      ],
+      "story": "S02"
+    },
+    {
+      "id": "try-step-3",
+      "label": "Step 3: Tokens are not the session",
+      "description": "the member portal calls the API with its access token. The API checks signature and expiry, not the session. Ending the session does not recall a token that was already issued. It lapses at expires_in.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "revoke"
+      ],
+      "story": "S03"
+    },
+    {
+      "id": "try-step-4",
+      "label": "Step 4: Step up",
+      "description": "the payments app requires mfa signed on within a window the admin sets (Ping's write-up uses 8 or 9 hours; the lab starts at 8). Check Session looks at the mfa method's own last sign-on time; if mfa is missing or too old, the user is bounced to MFA. Completing MFA moves that time to now. Recording mfa only describes what the flow did. It never performs the challenge.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "mfa-recency",
+        "authentication-methods"
+      ],
+      "story": "S04"
+    },
+    {
+      "id": "try-step-5",
+      "label": "Step 5: The widget reuses the session",
+      "description": "the embedded widget POSTs the SDK-token request with the stored sessionToken in global.sessionToken. The flow checks the PingOne session and returns tokens. A GET cannot carry the body, and a dropped sessionToken means the flow shows its sign-in form again.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "session-token"
+      ],
+      "story": "S05"
+    },
+    {
+      "id": "try-step-6",
+      "label": "Step 6: An admin changes the session",
+      "description": "Deleting the session, shortening the idle timeout or raising the mfa rule changes what the next authorize returns. A flow that reports a method that never ran makes SSO sticky. Tokens the apps already hold keep working until they expire. The session and each token run on separate clocks. The cookie is only how the browser presents the session.",
+      "group": "try-it",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "idle-timeout",
+        "revoke",
+        "sticky-sso"
+      ],
+      "story": "S06"
+    },
+    {
+      "id": "concept-separate",
+      "label": "Session, cookie and tokens are separate",
+      "description": "Ending a session does not recall tokens an app already holds.",
+      "group": "concept",
+      "action": {
+        "type": "route",
+        "href": "/"
+      },
+      "terms": [
+        "pingone-session",
+        "revoke"
+      ]
+    },
+    {
+      "id": "ref-doctor",
+      "label": "Doctor and health",
+      "description": "Preflight checks and the demo-health/1 endpoint.",
+      "group": "setup",
+      "action": {
+        "type": "route",
+        "href": "/api/health"
+      }
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "title": "Sign in once",
+      "say": "the member signs in through a DaVinci flow. Return Success Response creates the PingOne session and the browser receives a session cookie. The session is the signed-in state PingOne keeps. It is not a token."
+    },
+    {
+      "id": "S02",
+      "title": "A second app, no prompt",
+      "say": "the member portal sends the browser to PingOne. The browser sends the cookie, PingOne recognises the session and issues tokens without asking for a password. That is single sign-on. The cookie is only for PingOne; it never goes to the app."
+    },
+    {
+      "id": "S03",
+      "title": "Tokens are not the session",
+      "say": "the member portal calls the API with its access token. The API checks signature and expiry, not the session. Ending the session does not recall a token that was already issued. It lapses at expires_in."
+    },
+    {
+      "id": "S04",
+      "title": "Step up",
+      "say": "the payments app requires mfa signed on within a window the admin sets (Ping's write-up uses 8 or 9 hours; the lab starts at 8). Check Session looks at the mfa method's own last sign-on time; if mfa is missing or too old, the user is bounced to MFA. Completing MFA moves that time to now. Recording mfa only describes what the flow did. It never performs the challenge."
+    },
+    {
+      "id": "S05",
+      "title": "The widget reuses the session",
+      "say": "the embedded widget POSTs the SDK-token request with the stored sessionToken in global.sessionToken. The flow checks the PingOne session and returns tokens. A GET cannot carry the body, and a dropped sessionToken means the flow shows its sign-in form again."
+    },
+    {
+      "id": "S06",
+      "title": "An admin changes the session",
+      "say": "Deleting the session, shortening the idle timeout or raising the mfa rule changes what the next authorize returns. A flow that reports a method that never ran makes SSO sticky. Tokens the apps already hold keep working until they expire. The session and each token run on separate clocks. The cookie is only how the browser presents the session."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+# MOCK-ONLY hosted build of session-lab for the SE cluster (rule 18). Same image as the standalone, MODE=mock,
+# SESSIONLAB_HOSTED=1 (the banner then says HOSTED SIMULATION; the cookie is also marked Secure). No secrets, no tenant ids, no data volumes.
+# __IMAGE__ and __SE_HOST__ are filled in by k8s/deploy.sh; there is no namespace here (deploy.sh takes NAMESPACE).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-lab
+  labels: { app: session-lab }
+spec:
+  replicas: 1   # visitor state is in memory per workspace id (one id per browser), so a second replica would split a visitor's lab: keep one
+  selector:
+    matchLabels: { app: session-lab }
+  template:
+    metadata:
+      labels: { app: session-lab }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: app
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 6880 }
+          env:
+            - { name: MODE, value: mock }
+            - { name: SESSIONLAB_HOSTED, value: "1" }
+            - { name: SESSIONLAB_PUBLIC_HOST, value: __SE_HOST__ }
+            - { name: PORT, value: "6880" }
+            - { name: SESSIONLAB_BIND, value: 0.0.0.0 }
+          readinessProbe:
+            httpGet: { path: /api/health, port: http, httpHeaders: [{ name: Host, value: "127.0.0.1:6880" }] }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: http, httpHeaders: [{ name: Host, value: "127.0.0.1:6880" }] }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 500m, memory: 256Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: { sizeLimit: 16Mi } }

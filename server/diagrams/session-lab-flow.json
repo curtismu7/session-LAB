@@ -1,0 +1,232 @@
+{
+  "schema": "diagram-studio/1",
+  "id": "session-lab-flow",
+  "title": "Who holds what: the PingOne session, its cookie and the tokens",
+  "lede": "{{member}} signs in once. The PingOne session lives at PingOne and is recognised by a browser cookie. The apps hold tokens, which are a different thing with their own lifetime.",
+  "groups": {
+    "people": {
+      "label": "Browser",
+      "color": "dark"
+    },
+    "apps": {
+      "label": "Apps",
+      "color": "blue"
+    },
+    "idp": {
+      "label": "PingOne and DaVinci",
+      "color": "red"
+    },
+    "api": {
+      "label": "API",
+      "color": "grey"
+    },
+    "admin": {
+      "label": "Admin change",
+      "color": "amber"
+    }
+  },
+  "nodes": [
+    {
+      "id": "browser",
+      "group": "people",
+      "label": "Browser",
+      "sub": [
+        "holds the session cookie",
+        "HttpOnly: page scripts cannot read it"
+      ],
+      "x": 0,
+      "y": 200
+    },
+    {
+      "id": "portal",
+      "group": "apps",
+      "label": "{{portalApp}}",
+      "sub": [
+        "redirect app",
+        "holds its own tokens"
+      ],
+      "x": 420,
+      "y": 0
+    },
+    {
+      "id": "banking",
+      "group": "apps",
+      "label": "{{sensitiveApp}}",
+      "sub": [
+        "redirect app",
+        "mfa rule set by the admin"
+      ],
+      "x": 420,
+      "y": 200
+    },
+    {
+      "id": "widget",
+      "group": "apps",
+      "label": "{{embeddedApp}}",
+      "sub": [
+        "DaVinci widget",
+        "keeps the sessionToken"
+      ],
+      "x": 420,
+      "y": 400
+    },
+    {
+      "id": "dv",
+      "group": "idp",
+      "label": "DaVinci flow",
+      "sub": [
+        "Check Session",
+        "Return Success Response"
+      ],
+      "x": 860,
+      "y": 400
+    },
+    {
+      "id": "idp",
+      "group": "idp",
+      "label": "PingOne session",
+      "sub": [
+        "pwd, mfa, idle timeout",
+        "the session record"
+      ],
+      "x": 860,
+      "y": 100
+    },
+    {
+      "id": "api",
+      "group": "api",
+      "label": "API",
+      "sub": [
+        "checks token signature and expiry only"
+      ],
+      "x": 420,
+      "y": -190
+    },
+    {
+      "id": "admin",
+      "group": "admin",
+      "label": "Admin",
+      "sub": [
+        "revoke, idle timeout, mfa rule"
+      ],
+      "x": 1300,
+      "y": 100
+    }
+  ],
+  "edges": [
+    {
+      "source": "browser",
+      "target": "idp",
+      "label": "sign in"
+    },
+    {
+      "source": "idp",
+      "target": "browser",
+      "label": "Set-Cookie",
+      "dashed": true
+    },
+    {
+      "source": "portal",
+      "target": "idp",
+      "label": "authorize + cookie"
+    },
+    {
+      "source": "idp",
+      "target": "portal",
+      "label": "tokens, no prompt (SSO)",
+      "dashed": true
+    },
+    {
+      "source": "banking",
+      "target": "idp",
+      "label": "authorize + cookie"
+    },
+    {
+      "source": "idp",
+      "target": "banking",
+      "label": "step-up: mfa",
+      "dashed": true
+    },
+    {
+      "source": "widget",
+      "target": "dv",
+      "label": "POST {global.sessionToken}"
+    },
+    {
+      "source": "dv",
+      "target": "idp",
+      "label": "check session"
+    },
+    {
+      "source": "dv",
+      "target": "widget",
+      "label": "tokens + sessionToken",
+      "dashed": true
+    },
+    {
+      "source": "portal",
+      "target": "api",
+      "label": "Bearer token"
+    },
+    {
+      "source": "admin",
+      "target": "idp",
+      "label": "revoke / timeout / mfa rule / flow report"
+    }
+  ],
+  "steps": [
+    {
+      "title": "Sign in once",
+      "what": "{{member}} signs in through a DaVinci flow. Return Success Response creates the PingOne session and the browser receives a session cookie.",
+      "why": "The session is the signed-in state PingOne keeps. It is not a token.",
+      "edges": [
+        0,
+        1
+      ]
+    },
+    {
+      "title": "A second app, no prompt",
+      "what": "{{portalApp}} sends the browser to PingOne. The browser sends the cookie, PingOne recognises the session and issues tokens without asking for a password.",
+      "why": "That is single sign-on. The cookie is only for PingOne; it never goes to the app.",
+      "edges": [
+        2,
+        3
+      ]
+    },
+    {
+      "title": "Tokens are not the session",
+      "what": "{{portalApp}} calls the API with its access token. The API checks signature and expiry, not the session.",
+      "why": "Ending the session does not recall a token that was already issued. It lapses at expires_in.",
+      "edges": [
+        9
+      ]
+    },
+    {
+      "title": "Step up",
+      "what": "{{sensitiveApp}} requires mfa signed on within a window the admin sets (Ping's write-up uses 8 or 9 hours; the lab starts at 8). Check Session looks at the mfa method's own last sign-on time; if mfa is missing or too old, the user is bounced to MFA. Completing MFA moves that time to now.",
+      "why": "Recording mfa only describes what the flow did. It never performs the challenge.",
+      "edges": [
+        4,
+        5
+      ]
+    },
+    {
+      "title": "The widget reuses the session",
+      "what": "{{embeddedApp}} POSTs the SDK-token request with the stored sessionToken in global.sessionToken. The flow checks the PingOne session and returns tokens.",
+      "why": "A GET cannot carry the body, and a dropped sessionToken means the flow shows its sign-in form again.",
+      "edges": [
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "title": "An admin changes the session",
+      "what": "Deleting the session, shortening the idle timeout or raising the mfa rule changes what the next authorize returns. A flow that reports a method that never ran makes SSO sticky. Tokens the apps already hold keep working until they expire.",
+      "why": "The session and each token run on separate clocks. The cookie is only how the browser presents the session.",
+      "edges": [
+        10
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# __SE_HOST__ is supplied by k8s/deploy.sh; there is deliberately no default. No ingressClassName and no TLS secret are set: those are the
+# owner's cluster facts (UNVERIFIED which class and certificate SE uses). With no secretName the controller serves its default certificate,
+# which covers a host one label below the cluster wildcard; the owner adds a class or Certificate after review if SE needs one.
+# The app checks the Host header for loopback names only, so the ingress rewrites it to 127.0.0.1:6880 for the pod.
+# PUBLIC ingress (mock-only, no secrets, no tenant), so it is rate limited.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: session-lab
+  annotations:
+    nginx.ingress.kubernetes.io/upstream-vhost: "127.0.0.1:6880"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "20"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "3"
+    nginx.ingress.kubernetes.io/limit-connections: "30"
+    nginx.ingress.kubernetes.io/proxy-body-size: "16k"
+spec:
+  tls:
+    - hosts: [__SE_HOST__]
+  rules:
+    - host: __SE_HOST__
+      http:
+        paths:
+          - { path: /, pathType: Prefix, backend: { service: { name: session-lab, port: { name: http } } } }

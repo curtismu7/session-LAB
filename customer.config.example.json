@@ -1,0 +1,4 @@
+{
+  "_readme": "Copy to customer.config.json (git-ignored) to rename the apps in the story. Only these four cast values are read, each a short plain-text name; everything else is ignored. It overrides the chosen vertical's names.",
+  "cast": { "member": "Alex Rivera", "portalApp": "Member portal", "sensitiveApp": "Payments app", "embeddedApp": "Booking widget" }
+}

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: session-lab
+  labels: { app: session-lab }
+spec:
+  selector: { app: session-lab }
+  ports:
+    - { name: http, port: 80, targetPort: http }
