@@ -90,13 +90,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-1.49.1-chromium-${{ runner.os }}
+          key: playwright-1.64.1-chromium-${{ runner.os }}
       # Run 41207830794 hung for 11+ minutes here: the chromium download reaches 100% and then playwright 1.49.1's installer never
       # exits on Node 26. A current playwright installs cleanly. No --with-deps (apt): the runner image has chromium's libraries.
       - name: install Playwright outside the repo
         timeout-minutes: 5
         run: |
-          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw" && npm init -y >/dev/null && npm i playwright@1.49.1 && npx playwright install chromium
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw" && npm init -y >/dev/null && npm i playwright@1.64.1 && npx playwright install chromium
       - name: e2e
         timeout-minutes: 5
         run: |
