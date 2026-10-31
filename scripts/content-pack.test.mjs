@@ -7,8 +7,7 @@ import { validatePack } from './validate-content-pack.mjs';
 const committed = JSON.parse(fs.readFileSync(new URL('../content-pack.json', import.meta.url), 'utf8'));
 
 test('the pack validates against the schema and its cross-references hold', () => {
-  // KNOWN GAP: no catalog row matches this app yet, so demo.catalog is absent. Only that one error is tolerated; remove the filter once the owner assigns an id.
-  const errors = validatePack(buildPack()).filter((e) => e !== "/demo must have required property 'catalog'");
+  const errors = validatePack(buildPack());
   assert.deepEqual(errors, []);
 });
 
