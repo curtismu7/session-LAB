@@ -91,8 +91,8 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-1.49.1-chromium-${{ runner.os }}
-      # No --with-deps: that runs apt-get and hung for 11+ minutes on a hosted runner (run 41207830794). The runner image already
-      # carries the system libraries chromium needs, so only the browser itself is downloaded.
+      # Run 41207830794 hung for 11+ minutes here: the chromium download reaches 100% and then playwright 1.49.1's installer never
+      # exits on Node 26. A current playwright installs cleanly. No --with-deps (apt): the runner image has chromium's libraries.
       - name: install Playwright outside the repo
         timeout-minutes: 5
         run: |
