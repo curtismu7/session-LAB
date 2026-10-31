@@ -65,6 +65,9 @@ describe("App", () => {
   it("shows the simulation banner, the diagram boxes and no cookie before sign-in", async () => {
     render(<App />);
     expect(await screen.findByTestId("banner")).toHaveTextContent(/SIMULATION/);
+    expect(screen.getByTestId("banner")).toHaveAttribute("data-state", "mock");
+    expect(screen.getByTestId("mode-badge")).toHaveTextContent("Mock");
+    expect(screen.getByTestId("mode-badge")).toHaveAttribute("data-state", "mock");
     expect(screen.getByTestId("node-idp")).toBeInTheDocument();
     expect(screen.getByTestId("cookie-none")).toBeInTheDocument();
     expect(screen.getByTestId("docookie")).toHaveTextContent('document.cookie = ""');
@@ -98,9 +101,18 @@ describe("App", () => {
     await user.click(screen.getByText("Presenter mode"));
     expect(document.documentElement.dataset.present).toBe("1");
     expect(screen.getByTestId("banner")).toBeVisible();
+    expect(screen.getByTestId("mode-badge")).toBeVisible();
     fireEvent.keyDown(window, { key: "ArrowRight" });
     expect(screen.getByTestId("step")).toHaveTextContent("A second app");
     fireEvent.keyDown(window, { key: "Escape" });
     expect(document.documentElement.dataset.present).toBe("0");
+  });
+});
+
+describe("shared UI standard", () => {
+  it("imports standalone-ui.css before app.css", () => {
+    const main = fs.readFileSync(path.resolve(__dirname, "main.jsx"), "utf8");
+    expect(main.indexOf('import "./standalone-ui.css"')).toBeGreaterThan(-1);
+    expect(main.indexOf('import "./standalone-ui.css"')).toBeLessThan(main.indexOf('import "./app.css"'));
   });
 });

@@ -61,13 +61,13 @@ export default function App() {
 
   return (
     <>
-      <p className="mock-banner" role="note" data-testid="banner">
+      <p className="banner" role="note" data-testid="banner" data-state="mock">
         {info.hosted ? "HOSTED SIMULATION" : "SIMULATION"}: a mock PingOne and DaVinci session. No tenant, no real credentials, nothing leaves this {info.hosted ? "server" : "machine"}. Cookie and token names are labels, not product facts.
       </p>
       <header className="top">
         <h1>PingOne + DaVinci Session Lab</h1>
         <label>Vertical <select value={vertical} onChange={(e) => setVertical(e.target.value)} aria-label="Vertical">{story.verticals.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}</select></label>
-        <span className="muted small">Mode: mock identity provider</span>
+        <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
         <button onClick={reset}>Reset</button>
         <button onClick={() => setPresent((p) => !p)} aria-pressed={present}>{present ? "Exit presenter mode" : "Presenter mode"}</button>
       </header>
