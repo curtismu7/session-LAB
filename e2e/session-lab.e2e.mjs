@@ -1,9 +1,9 @@
-// Browser checks against a RUNNING session-lab: E2E_URL=http://127.0.0.1:6880/ node e2e/session-lab.e2e.mjs
+// Browser checks against a RUNNING session-lab: E2E_URL=http://127.0.0.1:6890/ node e2e/session-lab.e2e.mjs
 // Playwright is not a dependency of this repo: install it anywhere and point PLAYWRIGHT_DIR at that folder (or install it globally).
 import { createRequire } from 'node:module';
 const require = createRequire(`${process.env.PLAYWRIGHT_DIR || process.cwd()}/package.json`);
 const { chromium } = require('playwright');
-const B = process.env.E2E_URL || 'http://127.0.0.1:6880/';
+const B = process.env.E2E_URL || 'http://127.0.0.1:6890/';
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1400, height: 1000 } });
 const page = await ctx.newPage();

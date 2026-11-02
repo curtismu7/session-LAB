@@ -7,7 +7,7 @@
     "id": "session-lab",
     "name": "Session Lab",
     "catalog": "A30",
-    "baseUrl": "http://localhost:6880",
+    "baseUrl": "http://localhost:6890",
     "doctor": "/api/health",
     "tags": [
       "session",

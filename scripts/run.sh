@@ -1,6 +1,6 @@
 #!/bin/sh
 # One command on the host: install if needed, build the UI if needed, preflight, start.
-#   ./scripts/run.sh          (then open http://localhost:6880/)
+#   ./scripts/run.sh          (then open http://localhost:6890/)
 set -e
 cd "$(dirname "$0")/.."
 [ -d node_modules ] || npm ci
