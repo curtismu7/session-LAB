@@ -168,7 +168,7 @@ test('widget sign-in sets no cookie over HTTP', async () => {
 });
 
 test('SE shape: behind the ingress Host rewrite, a write with the public https Origin works only when hosted with the public host set', async () => {
-  const send = (b, origin) => rawHttp(`${b}/api/lab/sign-in`, { method: 'POST', headers: { host: '127.0.0.1:6880', origin, 'sec-fetch-site': 'same-origin', 'content-type': 'application/json' }, body: '{}' });
+  const send = (b, origin) => rawHttp(`${b}/api/lab/sign-in`, { method: 'POST', headers: { host: '127.0.0.1:6890', origin, 'sec-fetch-site': 'same-origin', 'content-type': 'application/json' }, body: '{}' });
   const prev = process.env.SESSIONLAB_PUBLIC_HOST;
   try {
     process.env.SESSIONLAB_PUBLIC_HOST = 'lab.se.example';

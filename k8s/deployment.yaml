@@ -25,18 +25,18 @@ spec:
           image: __IMAGE__
           imagePullPolicy: IfNotPresent
           ports:
-            - { name: http, containerPort: 6880 }
+            - { name: http, containerPort: 6890 }
           env:
             - { name: MODE, value: mock }
             - { name: SESSIONLAB_HOSTED, value: "1" }
             - { name: SESSIONLAB_PUBLIC_HOST, value: __SE_HOST__ }
-            - { name: PORT, value: "6880" }
+            - { name: PORT, value: "6890" }
             - { name: SESSIONLAB_BIND, value: 0.0.0.0 }
           readinessProbe:
-            httpGet: { path: /api/health, port: http, httpHeaders: [{ name: Host, value: "127.0.0.1:6880" }] }
+            httpGet: { path: /api/health, port: http, httpHeaders: [{ name: Host, value: "127.0.0.1:6890" }] }
             periodSeconds: 10
           livenessProbe:
-            httpGet: { path: /api/health, port: http, httpHeaders: [{ name: Host, value: "127.0.0.1:6880" }] }
+            httpGet: { path: /api/health, port: http, httpHeaders: [{ name: Host, value: "127.0.0.1:6890" }] }
             initialDelaySeconds: 10
             periodSeconds: 20
           resources:

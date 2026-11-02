@@ -28,7 +28,7 @@ test('no secret, tenant id, credential, real host or namespace sits in the manif
 
 test('the public ingress is rate limited and rewrites Host to loopback', () => {
   const ing = read('k8s/ingress.yaml');
-  for (const re of [/limit-rps/, /limit-connections/, /proxy-body-size/, /ssl-redirect: "true"/, /upstream-vhost: "127\.0\.0\.1:6880"/]) assert.match(ing, re);
+  for (const re of [/limit-rps/, /limit-connections/, /proxy-body-size/, /ssl-redirect: "true"/, /upstream-vhost: "127\.0\.0\.1:6890"/]) assert.match(ing, re);
 });
 
 test('the Dockerfile has one image for both forms: MODE defaults to mock, no fork', () => {

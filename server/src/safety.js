@@ -20,7 +20,7 @@ export function assertBindAllowed(host, env = process.env) {
 
 export const PORT_MIN = 6880;
 export const PORT_MAX = 6899;
-export const DEFAULT_PORT = 6880;
+export const DEFAULT_PORT = 6890;
 const FORBIDDEN_PORTS = new Set([8080, 5173, 3900, 4000, 4400, 4510, 4600, 4601, 4840, 18080, 19080, 19090]);
 export function portProblem(port) {
   if (!Number.isInteger(port)) return 'PORT is not an integer';
