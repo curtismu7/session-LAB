@@ -18,7 +18,7 @@ test('ports: 6880-6899 only, never a reserved or another agent\'s one', () => {
   assert.equal(portProblem(6880), null); assert.equal(portProblem(6899), null);
   for (const p of [5000, 5010, 6879, 6900, 8080, 5173, 3900, 4000, 4400, 4510, 4600, 4601, 4840, 18080, 19080, 19090, 4771, 4700]) assert.ok(portProblem(p), String(p));
   assert.ok(portProblem(NaN));
-  assert.equal(resolvePort({}), 6880);
+  assert.equal(resolvePort({}), 6890);
   assert.equal(resolvePort({ PORT: '6890' }), 6890);
   assert.throws(() => resolvePort({ PORT: '5010' }));
   assert.throws(() => resolvePort({ PORT: '6900' }));
@@ -26,7 +26,7 @@ test('ports: 6880-6899 only, never a reserved or another agent\'s one', () => {
 
 test('reserved hosts and the host scan', () => {
   assert.ok(isReservedHost('a.b.invalid')); assert.ok(isReservedHost('mcp.northwind.example')); assert.ok(!isReservedHost('example.com'), 'the rulebook allows only .example and .invalid'); assert.ok(!isReservedHost('example.org')); assert.ok(!isReservedHost('sub.example.com'));
-  assert.deepEqual(scanHosts('https://as.example.invalid/x and mail a@agent.example and http://localhost:6880/'), []);
+  assert.deepEqual(scanHosts('https://as.example.invalid/x and mail a@agent.example and http://localhost:6890/'), []);
   assert.deepEqual(scanHosts('https://example.com/mcp'), ['example.com']);
   assert.deepEqual(scanHosts('see https://real.com/x and 10.1.2.3'), ['10.1.2.3', 'real.com']);
 });
@@ -46,17 +46,17 @@ test('cleanText strips control and bidi characters and caps the length', () => {
 const run = (mw, req) => { const out = {}; const res = { status(c) { out.status = c; return this; }, json(b) { out.body = b; return this; } }; mw(req, res, () => { out.next = true; }); return out; };
 
 test('hostCheck refuses a non-loopback Host (DNS rebinding)', () => {
-  assert.ok(run(hostCheck, { headers: { host: 'localhost:6880' } }).next);
-  assert.ok(run(hostCheck, { headers: { host: '[::1]:6880' } }).next);
-  assert.equal(run(hostCheck, { headers: { host: 'evil.example.invalid:6880' } }).status, 403);
+  assert.ok(run(hostCheck, { headers: { host: 'localhost:6890' } }).next);
+  assert.ok(run(hostCheck, { headers: { host: '[::1]:6890' } }).next);
+  assert.equal(run(hostCheck, { headers: { host: 'evil.example.invalid:6890' } }).status, 403);
   assert.equal(run(hostCheck, { headers: {} }).status, 403);
 });
 
 test('sameOriginWrites: GET passes, cross-origin and cross-site writes refused', () => {
-  const h = { host: 'localhost:6880' };
+  const h = { host: 'localhost:6890' };
   assert.ok(run(sameOriginWrites, { method: 'GET', headers: { ...h, origin: 'http://evil.example.invalid' } }).next);
   assert.ok(run(sameOriginWrites, { method: 'POST', headers: h }).next, 'no Origin (curl) is allowed');
-  assert.ok(run(sameOriginWrites, { method: 'POST', headers: { ...h, origin: 'http://localhost:6880' } }).next);
+  assert.ok(run(sameOriginWrites, { method: 'POST', headers: { ...h, origin: 'http://localhost:6890' } }).next);
   assert.equal(run(sameOriginWrites, { method: 'POST', headers: { ...h, origin: 'http://localhost:9999' } }).status, 403);
   assert.equal(run(sameOriginWrites, { method: 'POST', headers: { ...h, origin: 'null' } }).status, 403);
   assert.equal(run(sameOriginWrites, { method: 'DELETE', headers: { ...h, 'sec-fetch-site': 'cross-site' } }).status, 403);
@@ -65,7 +65,7 @@ test('sameOriginWrites: GET passes, cross-origin and cross-site writes refused',
 });
 
 test('sameOriginWritesFor: the SE public host is accepted behind the Host rewrite, and nothing else is', () => {
-  const h = { host: '127.0.0.1:6880' };
+  const h = { host: '127.0.0.1:6890' };
   const mw = sameOriginWritesFor('lab.se.example');
   assert.ok(run(mw, { method: 'POST', headers: { ...h, origin: 'https://lab.se.example', 'sec-fetch-site': 'same-origin' } }).next);
   assert.equal(run(mw, { method: 'POST', headers: { ...h, origin: 'http://lab.se.example' } }).status, 403, 'https only');

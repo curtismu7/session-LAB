@@ -21,36 +21,36 @@ git clone https://github.com/ping-sandbox/session-LAB.git
 cd session-LAB
 npm ci
 npm run build
-PORT=6880 node server/src/index.js
+PORT=6890 node server/src/index.js
 ```
 
-Open http://127.0.0.1:6880/ (or `./scripts/run.sh`). Everything works in mock mode with no setup: no settings file, no account, no network.
+Open http://127.0.0.1:6890/ (or `./scripts/run.sh`). Everything works in mock mode with no setup: no settings file, no account, no network.
 
 ## Settings file
 
 This app needs no settings. It reads an optional `.env` in the repo root (git-ignored). It does not read the shared `~/Development/.env`. All keys are optional:
 
-- `PORT`: listen port (default 6880, must be 6880-6899).
+- `PORT`: listen port (default 6890, must be 6880-6899).
 - `MODE`: only `mock` (the default) is accepted.
 - `SESSIONLAB_BIND`: bind address (default `127.0.0.1`; non-loopback is refused unless it is a container).
 - `SESSIONLAB_HOSTED`: `1` changes the banner wording to HOSTED SIMULATION; behaviour is unchanged.
 - `SESSIONLAB_PUBLIC_HOST`: one extra https host accepted for writes behind an ingress (hosted build only).
 - `WEB_DIST`: path of the built web files (default: `web/dist`).
-- `HOST_PORT`: Docker published port (default 6880).
+- `HOST_PORT`: Docker published port (default 6890).
 - `customer.config.json` (git-ignored, copy of `customer.config.example.json`): renames the four cast values.
 
 ## Ports, and what to do if the port is taken
 
 ```
-Ports: session-lab listens on 6880 (set with PORT, default 6880).
+Ports: session-lab listens on 6890 (set with PORT, default 6890).
 Port range for this app: 6880-6899.
 
 If the port is taken:
 1. Find what is using it:
-   lsof -iTCP:6880 -sTCP:LISTEN -n -P
+   lsof -iTCP:6890 -sTCP:LISTEN -n -P
 2. If it is an old copy of this app, stop that process: kill <PID>.
 3. If it is something else, stop it, or start this app on another port:
-   PORT=6881 npm start
+   PORT=6891 npm start
 4. Do not use 8080, 5173, 3000, 4000, 4400, 4510, 4600-4601, 18080, 19080 or 19090.
 ```
 
@@ -70,7 +70,7 @@ Mock only. The header shows `Mode: mock identity provider` and the banner on eve
 ## Docker (optional)
 
 ```
-HOST_PORT=6880 docker compose up --build -d
+HOST_PORT=6890 docker compose up --build -d
 ```
 
 The port is published on 127.0.0.1 only; the container is non-root with a read-only filesystem. Use OrbStack, not Docker Desktop, on a Mac.

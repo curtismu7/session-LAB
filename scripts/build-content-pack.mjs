@@ -19,7 +19,7 @@ export function buildPack() {
     id: 'session-lab',
     title: 'PingOne and DaVinci sessions and cookies',
     version,
-    demo: { id: 'session-lab', name: 'Session Lab', catalog: 'A30', baseUrl: 'http://localhost:6880', doctor: '/api/health', tags: ['session', 'cookie', 'pingone', 'davinci', 'step-up', 'mock-only'] },
+    demo: { id: 'session-lab', name: 'Session Lab', catalog: 'A30', baseUrl: 'http://localhost:6890', doctor: '/api/health', tags: ['session', 'cookie', 'pingone', 'davinci', 'step-up', 'mock-only'] },
     glossary: [
       { id: 'pingone-session', term: 'PingOne session', definition: 'The record PingOne keeps that a person authenticated: when, how (pwd, mfa) and when it was last used. Apps do not hold it. It is separate from every token an app holds. Per Ping\'s docs the default idle timeout is 30 days; a shorter value (in minutes) is set on the Return Success Response node. The owner-supplied write-up adds that each Return Success Response pushes the idle window out.', aliases: ['SSO session'] },
       { id: 'session-cookie', term: 'Session cookie', definition: 'A browser cookie set by the identity service on its own origin that points at the session. The page cannot read it (HttpOnly). Ping\'s session write-up calls the real one the "ST cookie"; its flags are unsourced and this lab uses a labelled mock name.', aliases: ['ST cookie'] },
