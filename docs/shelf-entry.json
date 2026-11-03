@@ -12,5 +12,8 @@
       "notes": "Host-run: ./scripts/run.sh (port 6890). Mock only: no tenant, no credentials. Docker: HOST_PORT=6890 docker compose up --build -d (published on 127.0.0.1 only). Rename the apps with customer.config.json (see customer.config.example.json). Hosted SE build: not deployed yet.",
       "catalogId": "A30"
     }
+  ],
+  "pingProducts": [
+    "pingone"
   ]
 }
