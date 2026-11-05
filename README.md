@@ -4,7 +4,7 @@ How PingOne and DaVinci sessions and cookies work, and how an admin change to th
 
 Tier: Demo
 Repo: https://github.com/curtismu7/session-LAB
-Catalog: A30 (accepted by the owner, 2026-10-31; defined in the shelf catalog of cmuir_pingcorp/demo-shelf).
+Catalog: A30 (accepted by the owner, 2026-10-31; defined in the demo-shelf catalog).
 
 ## What is simulated
 
