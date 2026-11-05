@@ -3,7 +3,7 @@
 How PingOne and DaVinci sessions and cookies work, and how an admin change to the session shows up in the apps. A simulation: no tenant, no real credentials, no outbound network.
 
 Tier: Demo
-Repo: https://github.com/ping-sandbox/session-LAB
+Repo: https://github.com/curtismu7/session-LAB
 Catalog: A30 (accepted by the owner, 2026-10-31; defined in the shelf catalog of cmuir_pingcorp/demo-shelf).
 
 ## What is simulated
@@ -17,7 +17,7 @@ Catalog: A30 (accepted by the owner, 2026-10-31; defined in the shelf catalog of
 Prerequisites: Node 26 or newer. Docker only for the Docker form.
 
 ```
-git clone https://github.com/ping-sandbox/session-LAB.git
+git clone https://github.com/curtismu7/session-LAB.git
 cd session-LAB
 npm ci
 npm run build
