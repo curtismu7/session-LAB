@@ -89,6 +89,7 @@ export function createApp({ health = createHealth(), hosted = false, labFor = cr
     res.json({ result: { ...result, tokens: undefined }, lab: l.snapshot({ cookie: seen, secure: hosted }) });
   });
   api.use((_req, res) => res.status(404).json({ error: 'not_found' }));
+  app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
   app.use('/api', api);
   // eslint-disable-next-line no-unused-vars
   app.use((err, _req, res, _next) => {
@@ -99,7 +100,6 @@ export function createApp({ health = createHealth(), hosted = false, labFor = cr
   });
 
   if (fs.existsSync(path.join(WEB_DIST, 'index.html'))) {
-app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
     app.use(express.static(WEB_DIST));
     app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(WEB_DIST, 'index.html')));
   }
