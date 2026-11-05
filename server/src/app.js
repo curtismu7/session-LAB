@@ -11,6 +11,7 @@ import { modeFrom } from './config.js';
 import { createLab, COOKIE } from './engine.js';
 import { buildStory } from './story.js';
 import { verticalFrom } from './verticals.js';
+import { shelfInfo } from './shelfLink.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB_DIST = process.env.WEB_DIST || path.resolve(HERE, '../../web/dist');
@@ -98,6 +99,7 @@ export function createApp({ health = createHealth(), hosted = false, labFor = cr
   });
 
   if (fs.existsSync(path.join(WEB_DIST, 'index.html'))) {
+app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
     app.use(express.static(WEB_DIST));
     app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(WEB_DIST, 'index.html')));
   }

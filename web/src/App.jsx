@@ -4,6 +4,7 @@ import { AdminPanel, AppCard, CookiePanel, ImpactLog, Sources } from "./panels.j
 import { act, getInfo, getLab, getStory } from "./api.js";
 import { edgesForEvent } from "./eventEdges.js";
 import { SPEEDS, initial, reduce, speedMs } from "./stepper.js";
+import ShelfLink from "./components/ShelfLink.jsx";
 
 const APP_KEY = { portal: "portalApp", banking: "sensitiveApp", widget: "embeddedApp" };
 
@@ -66,6 +67,7 @@ export default function App() {
       </p>
       <header className="top">
         <h1>PingOne + DaVinci Session Lab</h1>
+        <ShelfLink />
         <label>Vertical <select value={vertical} onChange={(e) => setVertical(e.target.value)} aria-label="Vertical">{story.verticals.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}</select></label>
         <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
         <button onClick={reset}>Reset</button>
