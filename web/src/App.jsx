@@ -7,9 +7,23 @@ import { SPEEDS, initial, reduce, speedMs } from "./stepper.js";
 import ShelfLink from "./components/ShelfLink.jsx";
 
 const APP_KEY = { portal: "portalApp", banking: "sensitiveApp", widget: "embeddedApp" };
+const THEME_KEY = "sess.theme";
+const THEMES = [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]];
+function initialTheme() {
+  try { const t = localStorage.getItem(THEME_KEY); if (t === "light" || t === "dark") return t; } catch { /* storage blocked */ }
+  return "auto";
+}
 
 export default function App() {
   const [info, setInfo] = useState({ hosted: false });
+  const [theme, setTheme] = useState(initialTheme);
+
+  useEffect(() => { if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme; }, [theme]);
+
+  const pickTheme = (next) => {
+    try { if (next === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, next); } catch { /* not remembered */ }
+    setTheme(next);
+  };
   const [vertical, setVertical] = useState("airline");
   const [story, setStory] = useState(null);
   const [lab, setLab] = useState(null);
@@ -71,6 +85,11 @@ export default function App() {
         <label>Vertical <select value={vertical} onChange={(e) => setVertical(e.target.value)} aria-label="Vertical">{story.verticals.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}</select></label>
         <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
         <button onClick={reset}>Reset</button>
+        <label className="shell-theme">Theme
+          <select value={theme} onChange={(e) => pickTheme(e.target.value)}>
+            {THEMES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+          </select>
+        </label>
         <button onClick={() => setPresent((p) => !p)} aria-pressed={present}>{present ? "Exit presenter mode" : "Presenter mode"}</button>
       </header>
       <main className="page">
