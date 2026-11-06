@@ -67,7 +67,19 @@ export function createApp({ health = createHealth(), hosted = false, labFor = cr
   const api = express.Router();
   api.use(express.json({ limit: '4kb' }));
   api.use('/health', health.router);
-  api.get('/info', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ mode: modeFrom(), simulated: true, hosted }); });
+  api.get('/info', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ mode: modeFrom(), simulated: true, hosted, source: 'mock', realAvailable: false, realReason: REAL_REASON }); });
+
+  // Rule 19: the Mock/Real toggle's contract. This lab has no live side (a mock PingOne and DaVinci only, no tenant,
+  // no outbound network), so realAvailable is always false with the honest reason and Real is refused 409.
+  const REAL_REASON = 'Real is not available: this lab is a mock PingOne and DaVinci session with no tenant and no outbound network. A live side is not implemented.';
+  api.get('/mode', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ source: 'mock', realAvailable: false, realReason: REAL_REASON }); });
+  api.post('/mode', (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const b = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+    if (Object.keys(b).length !== 1 || !['mock', 'real'].includes(b.source)) return res.status(400).json({ error: 'bad_request', message: 'body must be exactly {source: "mock" or "real"}' });
+    if (b.source === 'real') return res.status(409).json({ error: 'real_not_available', message: REAL_REASON });
+    return res.json({ source: 'mock', realAvailable: false, realReason: REAL_REASON });
+  });
 
   // ?workspace= or the X-Workspace header names the visitor's own world; anything invalid falls back to `default`.
   const wsOf = (req) => workspaceFrom(req.query.workspace ?? req.get('x-workspace'));

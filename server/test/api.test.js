@@ -17,7 +17,25 @@ test('health is demo-health/1 and info says simulated', async () => {
     const h = await (await fetch(`${b}/api/health`)).json();
     assert.equal(h.schema, 'demo-health/1'); assert.equal(h.state, 'ready'); assert.equal(h.demo.id, 'session-lab');
     const i = await (await fetch(`${b}/api/info`)).json();
-    assert.deepEqual(i, { mode: 'mock', simulated: true, hosted: false });
+    assert.equal(i.mode, 'mock'); assert.equal(i.simulated, true); assert.equal(i.hosted, false);
+    // Rule 19: the info carries the toggle's fields, and this mock-only lab reports realAvailable false with the reason.
+    assert.equal(i.source, 'mock'); assert.equal(i.realAvailable, false); assert.match(i.realReason, /Real is not available/);
+  });
+});
+
+test('rule 19: POST /api/mode {source} refuses Real with a 409 reason, accepts mock, and the body must be exactly {source}', async () => {
+  await withServer(async (b) => {
+    const real = await fetch(`${b}/api/mode`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source: 'real' }) });
+    assert.equal(real.status, 409);
+    const rj = await real.json(); assert.equal(rj.error, 'real_not_available'); assert.match(rj.message, /Real is not available/);
+    const mock = await fetch(`${b}/api/mode`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source: 'mock' }) });
+    assert.equal(mock.status, 200);
+    const mj = await mock.json(); assert.equal(mj.source, 'mock'); assert.equal(mj.realAvailable, false);
+    for (const body of [{ source: 'mock', extra: 1 }, { source: 'junk' }, {}, 'x', [1]]) {
+      const r = await fetch(`${b}/api/mode`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      assert.equal(r.status, 400, JSON.stringify(body));
+    }
+    assert.equal((await fetch(`${b}/api/mode`)).status, 200);
   });
 });
 

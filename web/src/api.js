@@ -20,3 +20,6 @@ export const getLab = () => fetch("/api/lab", { headers: headers() }).then(json)
 export const getStory = (vertical) => fetch(`/api/story?vertical=${encodeURIComponent(vertical)}`).then(json);
 export const getInfo = () => fetch("/api/info").then(json);
 export const act = (action, body = {}) => fetch(`/api/lab/${action}`, { method: "POST", headers: headers(), body: JSON.stringify(body) }).then(json);
+
+// Rule 19: POST /api/mode {source:"mock"|"real"}. The body and status come back as data: a refused Real is a 409 with the server's reason.
+export const setMode = (source) => fetch("/api/mode", { method: "POST", headers: headers(), body: JSON.stringify({ source }) }).then(json);

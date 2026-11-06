@@ -26,7 +26,13 @@ beforeEach(() => {
   globalThis.fetch = vi.fn(async (url, init = {}) => {
     const u = String(url); calls.push([u, init.method || "GET"]);
     const ok = (body, status = 200) => ({ status, json: async () => body });
-    if (u.startsWith("/api/info")) return ok({ mode: "mock", simulated: true, hosted: false });
+    if (u.startsWith("/api/info")) return ok({ mode: "mock", simulated: true, hosted: false, source: "mock", realAvailable: false, realReason: "Real is not available: this lab is a mock PingOne and DaVinci session with no tenant and no outbound network. A live side is not implemented." });
+    if (u === "/api/mode" && init.method === "POST") {
+      const b = JSON.parse(init.body || "{}");
+      if (!["mock", "real"].includes(b.source) || Object.keys(b).length !== 1) return ok({ error: "bad_request", message: 'body must be exactly {source: "mock" or "real"}' }, 400);
+      if (b.source === "real") return ok({ error: "real_not_available", message: "Real is not available: this lab is a mock PingOne and DaVinci session with no tenant and no outbound network. A live side is not implemented." }, 409);
+      return ok({ source: "mock", realAvailable: false });
+    }
     if (u.startsWith("/api/story")) return ok(buildStory(new URL(u, "http://x").searchParams.get("vertical")));
     if (u === "/api/lab") return ok(lab.snapshot());
     const action = u.replace("/api/lab/", ""); const b = JSON.parse(init.body || "{}");
@@ -93,6 +99,17 @@ describe("App", () => {
     await waitFor(() => expect(screen.getByTestId("cookie-none")).toBeInTheDocument());
     expect(calls.some(([u, m]) => u === "/api/lab/reset" && m === "POST")).toBe(true);
     expect(screen.getByTestId("msg")).toHaveTextContent(/box positions/);
+  });
+  it("the Mock/Real toggle is in the header: Real is disabled with the server's reason, and a mock switch reloads the lab", async () => {
+    render(<App />); const user = userEvent.setup();
+    await screen.findByTestId("mode");
+    expect(screen.getByTestId("mode-mock")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("mode-real")).toBeDisabled();
+    expect(screen.getByTestId("mode-real").getAttribute("title")).toContain("Real is not available");
+    // The mock direction: the page POSTs the source and reloads the lab data.
+    await user.click(screen.getByTestId("mode-mock"));
+    await waitFor(() => expect(calls.some(([u, m]) => u === "/api/mode" && m === "POST")).toBe(true));
+    expect(calls.filter(([u]) => u === "/api/lab").length).toBeGreaterThan(1);
   });
   it("Simulate shows a step and the presenter toggle keeps the banner", async () => {
     render(<App />); const user = userEvent.setup();

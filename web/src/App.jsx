@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import Canvas from "./Canvas.jsx";
 import { AdminPanel, AppCard, CookiePanel, ImpactLog, Sources } from "./panels.jsx";
-import { act, getInfo, getLab, getStory } from "./api.js";
+import { act, getInfo, getLab, getStory, setMode } from "./api.js";
 import { edgesForEvent } from "./eventEdges.js";
 import { SPEEDS, initial, reduce, speedMs } from "./stepper.js";
 import ShelfLink from "./components/ShelfLink.jsx";
@@ -15,8 +15,17 @@ function initialTheme() {
 }
 
 export default function App() {
-  const [info, setInfo] = useState({ hosted: false });
+  const [info, setInfo] = useState({ hosted: false, source: "mock", realAvailable: false, realReason: undefined });
   const [theme, setTheme] = useState(initialTheme);
+
+  // Rule 19: the Mock/Real toggle. This lab is mock only (the server refuses Real with 409 and a reason), so the
+  // switch reloads the data after a mock switch and shows the server's reason as Real's disabled tooltip.
+  const selectMode = useCallback(async (source) => {
+    const r = await setMode(source);
+    if (r.status >= 400) { setMsg({ kind: "error", text: r.body?.message || `Could not switch to ${source}.` }); return; }
+    if (r.body) setInfo((i) => ({ ...i, ...r.body }));
+    getLab().then((x) => setLab(x.body));
+  }, []);
 
   useEffect(() => { if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme; }, [theme]);
 
@@ -84,6 +93,10 @@ export default function App() {
         <ShelfLink />
         <label>Vertical <select value={vertical} onChange={(e) => setVertical(e.target.value)} aria-label="Vertical">{story.verticals.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}</select></label>
         <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
+        <div className="seg" role="group" aria-label="Mode" data-testid="mode">
+          <button type="button" aria-pressed="true" onClick={() => selectMode("mock")} data-testid="mode-mock">Mock</button>
+          <button type="button" aria-pressed={info.source === "real"} disabled={info.realAvailable !== true} title={info.realAvailable !== true ? info.realReason : undefined} onClick={() => selectMode("real")} data-testid="mode-real">Real</button>
+        </div>
         <button onClick={reset}>Reset</button>
         <label className="shell-theme">Theme
           <select value={theme} onChange={(e) => pickTheme(e.target.value)}>
