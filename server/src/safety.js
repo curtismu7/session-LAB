@@ -65,19 +65,39 @@ export function cleanText(value, max = 80) {
   return String(value ?? '').replace(/[\u0000-\u001f\u007f-\u009f‪-‮⁦-⁩]/g, ' ').trim().slice(0, max);
 }
 
-export function hostCheck(req, res, next) {
-  const raw = String(req.headers.host || '');
-  const host = raw.startsWith('[') ? raw.slice(0, raw.indexOf(']') + 1) : raw.replace(/:\d+$/, '');
-  if (!isLoopbackHost(host)) return res.status(403).json({ error: 'bad_host', message: 'Host must be a loopback name' });
-  next();
+// The family lab-proxy (https://local.ping-devops.com:8443) sends Host `<name>:<this lab's port>` for a name listed in
+// LAB_ALLOWED_HOSTS (a comma list of host names, no ports). Loopback always works; unset means loopback only. index.js
+// parses it before the server starts and passes the set to createApp.
+export function labProxyHosts(env = process.env, port = resolvePort(env)) {
+  return new Set(String(env.LAB_ALLOWED_HOSTS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean).map((n) => `${n}:${port}`));
 }
+
+// Behind the lab-proxy the browser's Origin is the proxy's (https://local.ping-devops.com:8443) while Host is this lab's own
+// name. X-Forwarded-Host/-Proto are believed only when Host is one of proxyHosts (never loopback), so a request that did not
+// come through the proxy cannot use them.
+export function isProxiedSameOrigin(headers, proxyHosts) {
+  const xfh = String(headers['x-forwarded-host'] || '').trim().toLowerCase();
+  const xfp = String(headers['x-forwarded-proto'] || '').trim().toLowerCase();
+  return proxyHosts.has(String(headers.host || '').toLowerCase()) && xfh !== '' && (xfp === 'https' || xfp === 'http')
+    && headers.origin === `${xfp}://${xfh}`;
+}
+
+export function makeHostCheck(proxyHosts = new Set()) {
+  return function hostCheck(req, res, next) {
+    const raw = String(req.headers.host || '');
+    const host = raw.startsWith('[') ? raw.slice(0, raw.indexOf(']') + 1) : raw.replace(/:\d+$/, '');
+    if (!isLoopbackHost(host) && !proxyHosts.has(raw.toLowerCase())) return res.status(403).json({ error: 'bad_host', message: 'Host must be a loopback name' });
+    next();
+  };
+}
+export const hostCheck = makeHostCheck();
 
 const WRITE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 // On the SE build the ingress rewrites Host to loopback, so a browser's Origin (https://<se-host>) can never equal Host.
 // SESSIONLAB_PUBLIC_HOST (a plain host name, set from __SE_HOST__) names the one extra origin host accepted. Unset = loopback only.
 const PUBLIC_HOST = /^[a-z0-9]([a-z0-9.-]{0,251}[a-z0-9])?$/;
 export const publicHostFrom = (env = process.env) => (PUBLIC_HOST.test(env.SESSIONLAB_PUBLIC_HOST || '') ? env.SESSIONLAB_PUBLIC_HOST : null);
-export function sameOriginWritesFor(publicHost = null) {
+export function sameOriginWritesFor(publicHost = null, proxyHosts = new Set()) {
   return function sameOriginWrites(req, res, next) {
     if (!WRITE.has(req.method)) return next();
     const site = req.headers['sec-fetch-site'];
@@ -89,7 +109,7 @@ export function sameOriginWritesFor(publicHost = null) {
         const u = new URL(origin);
         ok = u.host === req.headers.host || (publicHost !== null && u.protocol === 'https:' && u.host === publicHost);
       } catch { /* malformed */ }
-      if (!ok) return res.status(403).json({ error: 'cross_origin', message: 'writes must be same-origin' });
+      if (!ok && !isProxiedSameOrigin(req.headers, proxyHosts)) return res.status(403).json({ error: 'cross_origin', message: 'writes must be same-origin' });
     }
     next();
   };

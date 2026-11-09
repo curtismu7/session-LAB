@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { hostCheck, publicHostFrom, sameOriginWritesFor } from './safety.js';
+import { makeHostCheck, publicHostFrom, sameOriginWritesFor } from './safety.js';
 import { createHealth } from './health.js';
 import { workspaceFrom } from './workspace.js';
 import { modeFrom } from './config.js';
@@ -57,11 +57,11 @@ const ACTIONS = {
   reset: (l) => { l.reset(); return { ok: true, reset: 'ok' }; },
 };
 
-export function createApp({ health = createHealth(), hosted = false, labFor = createLabs() } = {}) {
+export function createApp({ health = createHealth(), hosted = false, labFor = createLabs(), proxyHosts = new Set() } = {}) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(hostCheck);
-  app.use(sameOriginWritesFor(hosted ? publicHostFrom() : null));
+  app.use(makeHostCheck(proxyHosts));
+  app.use(sameOriginWritesFor(hosted ? publicHostFrom() : null, proxyHosts));
   app.use((_req, res, next) => { res.set('X-Content-Type-Options', 'nosniff'); next(); });
 
   const api = express.Router();

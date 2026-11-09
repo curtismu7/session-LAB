@@ -60,3 +60,9 @@ test('the image carries the diagram the server loads at runtime', () => {
 test('docker-compose.yml passes a usable SHELF_URL into the container (the shelf button needs it)', () => {
   assert.match(here('docker-compose.yml'), /^\s*SHELF_URL: \$\{SHELF_URL:-http:\/\/127\.0\.0\.1:4400\}\s*$/m);
 });
+
+test('docker-compose.yml allows the family lab-proxy name by default, never the bare launcher name', () => {
+  const compose = fs.readFileSync(new URL('../docker-compose.yml', import.meta.url), 'utf8');
+  assert.match(compose, /LAB_ALLOWED_HOSTS: \$\{LAB_ALLOWED_HOSTS:-session-lab\.local\.ping-devops\.com\}\n/);
+  assert.doesNotMatch(compose, /LAB_ALLOWED_HOSTS:[^\n]*[-,]local\.ping-devops\.com\b/);
+});
