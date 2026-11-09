@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { installNetguard } from './netguard.js';
 import { startHttpServer, createApp } from './app.js';
 import { allPassed, runChecks } from './doctor.js';
-import { assertBindAllowed, bindHost, resolvePort } from './safety.js';
+import { assertBindAllowed, bindHost, labProxyHosts, resolvePort } from './safety.js';
 import { hostedFrom, modeFrom } from './config.js';
 
 installNetguard(); // before anything else can open a socket
@@ -16,6 +16,9 @@ if (!allPassed(checks)) {
 }
 modeFrom(process.env); // refuses anything but MODE=mock
 const host = assertBindAllowed(bindHost(), process.env);
-const { url } = await startHttpServer({ port: resolvePort(), host, app: createApp({ hosted: hostedFrom(process.env) }) });
+const port = resolvePort();
+// LAB_ALLOWED_HOSTS (the family lab-proxy's name for this lab) is parsed before the server starts.
+const proxyHosts = labProxyHosts(process.env, port);
+const { url } = await startHttpServer({ port, host, app: createApp({ hosted: hostedFrom(process.env), proxyHosts }) });
 console.log(`[session-lab] mock session lab at ${url} (loopback, no outbound network)`);
 console.log(`[session-lab] health: ${url}api/health`);
