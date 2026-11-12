@@ -93,7 +93,6 @@ export default function App() {
       </p>
       <header className="top">
         <h1>PingOne + DaVinci Session Lab</h1>
-        <ShelfLink />
         <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
         <TopMenu
           mode={{ value: info.source === "real" ? "real" : "mock", onChange: selectMode, realAvailable: info.realAvailable === true, realHint: info.realAvailable !== true ? info.realReason : undefined }}
