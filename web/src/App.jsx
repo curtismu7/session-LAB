@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "r
 import Canvas from "./Canvas.jsx";
 import { AdminPanel, AppCard, CookiePanel, ImpactLog, Sources } from "./panels.jsx";
 import { act, getInfo, getLab, getStory, setMode } from "./api.js";
+import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
 import { edgesForEvent } from "./eventEdges.js";
 import { SPEEDS, initial, reduce, speedMs } from "./stepper.js";
 import ShelfLink from "./components/ShelfLink.jsx";
@@ -17,6 +18,7 @@ function initialTheme() {
 export default function App() {
   const [info, setInfo] = useState({ hosted: false, source: "mock", realAvailable: false, realReason: undefined });
   const [theme, setTheme] = useState(initialTheme);
+  const [fontStep, setFontStep] = useState(() => { try { const f = localStorage.getItem("sess.font"); return ["S","M","L"].includes(f) ? f : "M"; } catch { return "M"; } });
 
   // Rule 19: the Mock/Real toggle. This lab is mock only (the server refuses Real with 409 and a reason), so the
   // switch reloads the data after a mock switch and shows the server's reason as Real's disabled tooltip.
@@ -28,6 +30,7 @@ export default function App() {
   }, []);
 
   useEffect(() => { if (theme === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme; }, [theme]);
+  useEffect(() => { applyFontSize(fontStep); try { localStorage.setItem("sess.font", fontStep); } catch {} }, [fontStep]);
 
   const pickTheme = (next) => {
     try { if (next === "auto") localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, next); } catch { /* not remembered */ }
@@ -91,19 +94,19 @@ export default function App() {
       <header className="top">
         <h1>PingOne + DaVinci Session Lab</h1>
         <ShelfLink />
-        <label>Vertical <select value={vertical} onChange={(e) => setVertical(e.target.value)} aria-label="Vertical">{story.verticals.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}</select></label>
         <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
-        <div className="seg" role="group" aria-label="Mode" data-testid="mode">
-          <button type="button" aria-pressed="true" onClick={() => selectMode("mock")} data-testid="mode-mock">Mock</button>
-          <button type="button" aria-pressed={info.source === "real"} disabled={info.realAvailable !== true} title={info.realAvailable !== true ? info.realReason : undefined} onClick={() => selectMode("real")} data-testid="mode-real">Real</button>
-        </div>
-        <button onClick={reset}>Reset</button>
-        <label className="shell-theme">Theme
-          <select value={theme} onChange={(e) => pickTheme(e.target.value)}>
-            {THEMES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
-          </select>
-        </label>
-        <button onClick={() => setPresent((p) => !p)} aria-pressed={present}>{present ? "Exit presenter mode" : "Presenter mode"}</button>
+        <TopMenu
+          mode={{ value: info.source === "real" ? "real" : "mock", onChange: selectMode, realAvailable: info.realAvailable === true, realHint: info.realAvailable !== true ? info.realReason : undefined }}
+          vertical={{ value: vertical, onChange: setVertical, options: story ? story.verticals.map((v) => v.id) : ["airline"] }}
+          theme={{ value: theme, onChange: pickTheme }}
+          fontSize={{ value: fontStep, onChange: setFontStep }}
+          present={{ active: present, onToggle: () => setPresent((p) => !p), label: "Presenter mode" }}
+          help={{ href: "https://github.com/curtismu7/session-LAB#readme" }}
+          version={info?.version || null}
+          onReset={reset}
+        >
+          <ShelfLink />
+        </TopMenu>
       </header>
       <main className="page">
         {msg && <p className={`msg msg--${msg.kind}`} role="status" data-testid="msg">{msg.text}</p>}

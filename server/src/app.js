@@ -67,7 +67,7 @@ export function createApp({ health = createHealth(), hosted = false, labFor = cr
   const api = express.Router();
   api.use(express.json({ limit: '4kb' }));
   api.use('/health', health.router);
-  api.get('/info', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ mode: modeFrom(), simulated: true, hosted, source: 'mock', realAvailable: false, realReason: REAL_REASON }); });
+  api.get('/info', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ mode: modeFrom(), simulated: true, hosted, source: 'mock', realAvailable: false, realReason: REAL_REASON, version: (() => { try { return JSON.parse(fs.readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version || null; } catch { return null; } })() }); });
 
   // Rule 19: the Mock/Real toggle's contract. This lab has no live side (a mock PingOne and DaVinci only, no tenant,
   // no outbound network), so realAvailable is always false with the honest reason and Real is refused 409.

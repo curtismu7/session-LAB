@@ -102,12 +102,13 @@ describe("App", () => {
   });
   it("the Mock/Real toggle is in the header: Real is disabled with the server's reason, and a mock switch reloads the lab", async () => {
     render(<App />); const user = userEvent.setup();
-    await screen.findByTestId("mode");
-    expect(screen.getByTestId("mode-mock")).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByTestId("mode-real")).toBeDisabled();
-    expect(screen.getByTestId("mode-real").getAttribute("title")).toContain("Real is not available");
+    await screen.findByTestId("mode-select");
+    expect(screen.getByTestId("mode-select")).toHaveValue("mock");
+    const realOption = screen.getByTestId("mode-select").querySelector('option[value="real"]');
+    expect(realOption).toBeDisabled();
+    expect(realOption.getAttribute("title")).toContain("Real is not available");
     // The mock direction: the page POSTs the source and reloads the lab data.
-    await user.click(screen.getByTestId("mode-mock"));
+    await user.selectOptions(screen.getByTestId("mode-select"), "mock");
     await waitFor(() => expect(calls.some(([u, m]) => u === "/api/mode" && m === "POST")).toBe(true));
     expect(calls.filter(([u]) => u === "/api/lab").length).toBeGreaterThan(1);
   });
