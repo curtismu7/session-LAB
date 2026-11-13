@@ -121,9 +121,9 @@ ok(Math.abs(b2.x - b0.x) < 15 && Math.abs(b2.y - b0.y) < 15, 'Reset diagram rest
 await page.getByRole('button', { name: 'Reset', exact: true }).click();
 await page.getByTestId('cookie-none').waitFor();
 ok(true, 'Reset clears the session world');
-await page.getByText('Presenter mode').click();
+await page.getByTestId('presenter').click();
 ok(await page.getByTestId('banner').isVisible(), 'banner visible in presenter mode');
-await page.getByText('Exit presenter mode').click();
+await page.getByTestId('presenter').click();
 await page.getByLabel('Vertical').selectOption('health');
 await page.getByRole('heading', { name: 'Claims payments app' }).waitFor();
 ok(true, 'vertical pack renames the apps');
