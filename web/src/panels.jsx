@@ -23,7 +23,7 @@ export function CookiePanel({ lab, onSignIn, persona, setPersona }) {
       <div className="row">
         <label>Sign in as <select value={persona} onChange={(e) => setPersona(e.target.value)} aria-label="Persona">
           <option value="alex">Alex Rivera</option><option value="sam">Sam Okafor</option></select></label>
-        <button className="primary" onClick={() => onSignIn(["pwd"])}>Sign in (password only)</button>
+        <button onClick={() => onSignIn(["pwd"])}>Sign in (password only)</button>
         <button onClick={() => onSignIn(["pwd", "mfa"])}>Sign in (password + MFA)</button>
         <button onClick={() => onSignIn(["fido", "pwdless"])}>Sign in (passwordless: fido + pwdless)</button>
       </div>
@@ -82,7 +82,7 @@ export function AppCard({ app, name, run, widgetHasToken, persona }) {
       {app.mfaMaxAgeSec !== null && <p className="muted small">Requires mfa within {dur(app.mfaMaxAgeSec)}.</p>}
       <div className="row">
         {!isWidget && <button onClick={() => run("authorize", { app: app.id })}>Open app (SSO)</button>}
-        {!isWidget && r?.outcome === "step_up_required" && <button className="primary" onClick={() => run("complete-mfa")}>Complete MFA</button>}
+        {!isWidget && r?.outcome === "step_up_required" && <button onClick={() => run("complete-mfa")}>Complete MFA</button>}
         {isWidget && <button onClick={() => run("widget/sign-in", { persona, methods: ["pwd"] })}>Sign in through the flow</button>}
         {isWidget && <button onClick={() => run("widget/invoke", { method: "POST", body: { global: { sessionToken: widgetHasToken } } })} disabled={false}>Reuse sessionToken (POST)</button>}
         {isWidget && <button onClick={() => run("widget/invoke", { method: "GET", body: { global: { sessionToken: widgetHasToken } } })}>Try as GET</button>}
