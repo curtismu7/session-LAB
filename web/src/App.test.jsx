@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App.jsx";
+import { setJsonView } from "./components/JsonPane.jsx";
 import { toFlow } from "./Canvas.jsx";
 import { edgesForEvent } from "./eventEdges.js";
 import { SPEEDS, initial, reduce } from "./stepper.js";
@@ -22,6 +23,7 @@ function buildStory(vertical) {
 let lab;
 const calls = [];
 beforeEach(() => {
+  setJsonView("form"); // the Form | JSON choice is shared module state
   lab = createLab({ workspace: "t" }); calls.length = 0;
   globalThis.fetch = vi.fn(async (url, init = {}) => {
     const u = String(url); calls.push([u, init.method || "GET"]);
@@ -124,6 +126,34 @@ describe("App", () => {
     expect(screen.getByTestId("step")).toHaveTextContent("A second app");
     fireEvent.keyDown(window, { key: "Escape" });
     expect(document.documentElement.dataset.present).toBe("0");
+  });
+});
+
+describe("JSON panes (Rule 24: shared JsonPane, Form | JSON, full view)", () => {
+  it("the session record, the decoded access token and an event each get a Form | JSON toggle and show the exact JSON", async () => {
+    render(<App />); const user = userEvent.setup();
+    await user.click(await screen.findByText("Sign in (password only)"));
+    await screen.findByTestId("session");
+    await user.click(within(screen.getByTestId("app-portal")).getByText("Open app (SSO)"));
+    await waitFor(() => expect(screen.getByTestId("outcome-portal")).toHaveTextContent("signed in"));
+
+    // Form is the default view: labelled fields, no JSON punctuation, and the two toggle buttons read Form and JSON.
+    const rec = screen.getByTestId("session-record");
+    expect(within(rec).getByRole("button", { name: "Form" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(rec).getByRole("button", { name: "JSON" })).toHaveAttribute("aria-pressed", "false");
+    expect(within(rec).getByTestId("session-json")).toHaveTextContent("idleTimeoutInMinutes");
+
+    // JSON view (one choice for the whole page): the exact text, on every pane.
+    await user.click(within(rec).getByRole("button", { name: "JSON" }));
+    expect(screen.getByTestId("session-json").tagName).toBe("PRE");
+    expect(screen.getByTestId("session-json")).toHaveTextContent('"idleTimeoutInMinutes": 43200');
+    expect(screen.getByTestId("session-json")).toHaveTextContent('"withAuthenticator"');
+    expect(screen.getByTestId("session-json")).toHaveTextContent('"pwd"');
+    expect(screen.getByTestId("claims-portal")).toHaveTextContent('"aud": "portal"');
+    expect(screen.getByTestId("claims-portal")).toHaveTextContent('"exp"');
+    const ev = screen.getByTestId("log").querySelector("pre");
+    expect(ev).toHaveTextContent('"kind": "authorize.sso"');
+    expect(ev).toHaveTextContent('"traceparent"');
   });
 });
 
