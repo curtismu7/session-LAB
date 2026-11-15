@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Json from "./components/JsonPane.jsx";
 
 const dur = (s) => {
   if (s === null || s === undefined) return "-";
@@ -47,7 +48,7 @@ export function CookiePanel({ lab, onSignIn, persona, setPersona }) {
           <dt>idle timeout</dt><dd>{s.record.idleTimeoutInMinutes} minutes ({dur(s.idleTimeoutSec)}); {s.state === "active" ? `${dur(s.idleRemainingSec)} left, slides with use` : "over"}</dd>
         </dl>
       ) : <p className="muted">No session at PingOne.</p>}
-      {s && <details data-testid="session-record"><summary>Session record (mock values, the shape Ping&apos;s write-up shows)</summary><pre>{JSON.stringify({ session: s.record }, null, 2)}</pre>
+      {s && <details data-testid="session-record"><summary>Session record (mock values, the shape Ping&apos;s write-up shows)</summary><Json value={{ session: s.record }} label="Session record" testId="session-json" hot={["idleTimeoutInMinutes", "expiresAt", "authenticators", "withAuthenticator"]} />
         <p className="muted small">Check Session reads <code>lastSignOn.withAuthenticator.&lt;method&gt;.at</code> and the idle expiry, not just whether a cookie exists.</p></details>}
       <h4>DaVinci sessionToken (kept by the widget app)</h4>
       {w ? <p data-testid="sessiontoken"><code className="wrap">{w.value}</code> <span className={`pill ${w.valid ? "pill--ok" : "pill--bad"}`}>{w.valid ? "points at a live session" : "points at nothing"}</span></p>
@@ -62,7 +63,7 @@ function Tokens({ tokens }) {
   return (
     <details>
       <summary>Raw tokens (mock, labelled)</summary>
-      {["access_token", "id_token"].map((k) => <p key={k}><strong>{k}</strong><br /><code className="wrap">{tokens[k]}</code></p>)}
+      {["access_token", "id_token"].map((k) => <div key={k}><strong>{k}</strong><Json value={tokens[k]} label={k} /></div>)}
       <p><strong>refresh_token</strong><br /><code className="wrap">{tokens.refresh_token}</code></p>
       {tokens.sessionToken && <p><strong>sessionToken</strong><br /><code className="wrap">{tokens.sessionToken}</code></p>}
     </details>
@@ -92,7 +93,7 @@ export function AppCard({ app, name, run, widgetHasToken, persona }) {
       {app.access ? (
         <p data-testid={`access-${app.id}`}>Access token: <strong>{dur(app.access.remainingSec)}</strong> left. It lapses on its own clock, whatever the session does.</p>
       ) : <p className="muted small">No tokens held.</p>}
-      {app.access && <details><summary>Decoded access token</summary><pre>{JSON.stringify(app.access.claims, null, 2)}</pre></details>}
+      {app.access && <details><summary>Decoded access token</summary><Json value={app.access.claims} label="Decoded access token" testId={`claims-${app.id}`} hot={["exp"]} /></details>}
       <Tokens tokens={app.tokens} />
     </article>
   );
@@ -144,7 +145,7 @@ export function ImpactLog({ events }) {
         {[...events].reverse().map((e) => (
           <li key={e.n}>
             <strong>{e.kind}</strong> <span className="muted">({e.actor})</span>: {e.detail}
-            <details><summary className="small">raw</summary><pre>{`${e.at}\ntraceparent: ${e.traceparent}\n${JSON.stringify(e, null, 2)}`}</pre></details>
+            <details><summary className="small">raw</summary><Json value={e} label="Event" testId={`event-${e.n}`} hot={["kind", "sessionId", "app"]} /></details>
           </li>
         ))}
       </ol>

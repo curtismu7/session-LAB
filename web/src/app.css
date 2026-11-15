@@ -20,11 +20,11 @@ button.link { min-height: 0; padding: 0; border: 0; background: none; color: var
 .cols { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); align-items: start; }
 .cards { display: grid; gap: 0.75rem; } .card { margin: 0; background: var(--bg); }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 0.75rem; margin: 0; } .kv dt { color: var(--muted); } .kv dd { margin: 0; min-width: 0; }
-code, pre { font-size: 0.82rem; } pre { overflow: auto; margin: 0.25rem 0; }
+code, pre { font-size: 0.82rem; } pre { margin: 0.25rem 0; }
 .wrap { overflow-wrap: anywhere; word-break: break-all; }
 .pill { display: inline-block; padding: 0 0.5rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border); }
 .pill--ok { background: var(--surface-2); color: var(--status-ok); } .pill--bad { background: var(--accent-soft); color: var(--danger-text); } .pill--warn { background: var(--surface-2); color: var(--status-warn); }
-.log { padding-left: 1.2rem; max-height: 26rem; overflow: auto; } .log li { margin-bottom: 0.4rem; }
+.log { padding-left: 1.2rem; } .log li { margin-bottom: 0.4rem; }
 .msg { padding: 0.5rem 0.75rem; border-radius: 6px; } .msg--ok { background: var(--surface-2); color: var(--status-ok); } .msg--error { background: var(--accent-soft); color: var(--danger-text); }
 @media (max-width: 600px) { .canvas { height: 22rem; } .page { padding: 0.5rem 0; } }
 :root[data-present="1"] body { font-size: 20px; } :root[data-present="1"] .canvas { height: 38rem; }

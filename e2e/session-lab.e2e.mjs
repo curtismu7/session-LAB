@@ -57,6 +57,7 @@ await page.getByRole('button', { name: 'Reset', exact: true }).click(); await pa
 await page.getByText('Sign in (passwordless: fido + pwdless)').click();
 await page.getByTestId('session').waitFor();
 await page.getByText('Session record (mock values').click();
+await page.getByTestId('session-record').getByRole('button', { name: 'JSON', exact: true }).click(); // the exact JSON text (Form is the default view)
 const rec = await page.getByTestId('session-record').innerText();
 ok(/fido/.test(rec) && /pwdless/.test(rec) && !/"pwd"/.test(rec), 'passwordless session record shows fido + pwdless and no pwd');
 ok(/idleTimeoutInMinutes/.test(rec) && /withAuthenticator/.test(rec), 'record shows idleTimeoutInMinutes and per-method sign-on');
