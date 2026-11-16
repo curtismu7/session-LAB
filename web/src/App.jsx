@@ -6,6 +6,7 @@ import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
 import { edgesForEvent } from "./eventEdges.js";
 import { SPEEDS, initial, reduce, speedMs } from "./stepper.js";
 import ShelfLink from "./components/ShelfLink.jsx";
+import VerifyMark from "./components/VerifyMark.jsx";
 
 const APP_KEY = { portal: "portalApp", banking: "sensitiveApp", widget: "embeddedApp" };
 const THEME_KEY = "sess.theme";
@@ -111,6 +112,7 @@ export default function App() {
           onReset={reset}
         >
           <ShelfLink />
+          <VerifyMark id="session-lab" />
         </TopMenu>
       </header>
       <main className="page" id="main" tabIndex={-1}>
