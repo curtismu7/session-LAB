@@ -91,9 +91,15 @@ export default function App() {
       <p className="banner" role="note" data-testid="banner" data-state="mock">
         {info.hosted ? "HOSTED SIMULATION" : "SIMULATION"}: a mock PingOne and DaVinci session. No tenant, no real credentials, nothing leaves this {info.hosted ? "server" : "machine"}. Cookie and token names are labels, not product facts.
       </p>
-      <header className="top">
-        <h1>PingOne + DaVinci Session Lab</h1>
-        <span className="banner mode-badge" data-state="mock" data-testid="mode-badge">Mock</span>
+      <header className="shell-bar">
+        <span className="shell-brand">
+          <span className="shell-logo" aria-hidden="true">SL</span>
+          <h1>PingOne + DaVinci Session Lab</h1>
+          <span className="shell-badge" data-state="mock" data-testid="mode-badge">Mock</span>
+        </span>
+        <nav className="shell-nav" aria-label="Pages">
+          <a href="#main" aria-current="page">Session lab</a>
+        </nav>
         <TopMenu
           mode={{ value: info.source === "real" ? "real" : "mock", onChange: selectMode, realAvailable: info.realAvailable === true, realHint: info.realAvailable !== true ? info.realReason : undefined }}
           vertical={{ value: vertical, onChange: setVertical, options: story ? story.verticals.map((v) => v.id) : ["airline"] }}
@@ -107,7 +113,7 @@ export default function App() {
           <ShelfLink />
         </TopMenu>
       </header>
-      <main className="page">
+      <main className="page" id="main" tabIndex={-1}>
         {msg && <p className={`msg msg--${msg.kind}`} role="status" data-testid="msg">{msg.text}</p>}
         <p className="lede">{story.diagram.lede}</p>
         <div className="bar" role="toolbar" aria-label="Walkthrough controls">
