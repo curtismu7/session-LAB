@@ -1,5 +1,5 @@
 /* Session Lab: layout and components on top of the shared standalone-ui.css (imported first, in main.jsx). Tokens only, no colours. */
-.page { max-width: 1100px; margin: 0 auto; padding: 1rem 0; }
+.page { max-width: 2200px; margin: 0 auto; padding: 1rem 0; }
 main:focus:not(:focus-visible) { outline: none; }
 h1 { margin: 0; font-size: 1.25rem; } h3 { margin: 0 0 0.5rem; font-size: 1.1rem; } h4 { margin: 0.75rem 0 0.25rem; }
 .lede, .muted { color: var(--muted); } .small { font-size: 0.85rem; }
