@@ -3,6 +3,8 @@ import Canvas from "./Canvas.jsx";
 import { AdminPanel, AppCard, CookiePanel, ImpactLog, Sources } from "./panels.jsx";
 import { act, getInfo, getLab, getStory, setMode } from "./api.js";
 import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
+import TalkTrackDialog from "./talk-track/TalkTrackDialog.jsx";
+import talkMd from "../../docs/talk-track.md?raw";
 import { edgesForEvent } from "./eventEdges.js";
 import { SPEEDS, initial, reduce, speedMs } from "./stepper.js";
 import ShelfLink from "./components/ShelfLink.jsx";
@@ -18,6 +20,15 @@ function initialTheme() {
 
 export default function App() {
   const [info, setInfo] = useState({ hosted: false, source: "mock", realAvailable: false, realReason: undefined });
+  const [talkOpen, setTalkOpen] = useState(false);
+  const talkSteps = (() => {
+    const steps = []; let n = 0;
+    for (const line of talkMd.split("\n")) {
+      const m = line.match(/^\d+\.\s+(?:"(.+?)"|\*\*(.+?)\.\*\*\s*(.*))$/);
+      if (m) { n += 1; steps.push({ id: `s${n}`, title: (m[1] || m[2]).slice(0, 60), say: m[1] || m[3] }); }
+    }
+    return steps.length ? steps : [{ id: "s1", title: "Talk track", say: talkMd.slice(0, 600) }];
+  })();
   const [theme, setTheme] = useState(initialTheme);
   const [fontStep, setFontStep] = useState(() => { try { const f = localStorage.getItem("sess.font"); return ["S","M","L"].includes(f) ? f : "M"; } catch { return "M"; } });
 
@@ -107,6 +118,7 @@ export default function App() {
           theme={{ value: theme, onChange: pickTheme }}
           fontSize={{ value: fontStep, onChange: setFontStep }}
           present={{ active: present, onToggle: () => setPresent((p) => !p), label: "Presenter mode" }}
+          talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
           help={{ href: "https://github.com/curtismu7/session-LAB#readme" }}
           version={info?.version || null}
           onReset={reset}
@@ -149,6 +161,8 @@ export default function App() {
             </section>
           </div>
         </div>
+      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={talkSteps} />
+
       </main>
     </>
   );
