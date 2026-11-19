@@ -19,7 +19,7 @@ export function CookiePanel({ lab, onSignIn, persona, setPersona }) {
   const c = lab.cookie; const s = lab.sessions.at(-1); const w = lab.widgetSessionToken;
   return (
     <section className="panel" aria-labelledby="h-cookie">
-      <h3 id="h-cookie">Browser and session</h3>
+      <h3 id="h-cookie"><span className="step-num" aria-hidden="true">1</span>Browser and session</h3>
       <div className="row">
         <label>Sign in as <select value={persona} onChange={(e) => setPersona(e.target.value)} aria-label="Persona">
           <option value="alex">Alex Rivera</option><option value="sam">Sam Okafor</option></select></label>
@@ -105,7 +105,7 @@ export function AdminPanel({ lab, run }) {
   const banking = lab.apps.find((a) => a.id === "banking");
   return (
     <section className="panel" aria-labelledby="h-admin">
-      <h3 id="h-admin">Admin changes</h3>
+      <h3 id="h-admin"><span className="step-num" aria-hidden="true">2</span>Admin changes</h3>
       <h4>End the session</h4>
       <div className="row">
         <button onClick={() => run("admin/revoke", { soft: false })}>Delete session</button>
@@ -139,7 +139,7 @@ export function AdminPanel({ lab, run }) {
 export function ImpactLog({ events }) {
   return (
     <section className="panel" aria-labelledby="h-log">
-      <h3 id="h-log">Impact log</h3>
+      <h3 id="h-log"><span className="step-num" aria-hidden="true">3</span>Impact log</h3>
       {events.length === 0 && <p className="muted">Nothing yet. Sign in, open an app, then change the session.</p>}
       <ol className="log" data-testid="log">
         {[...events].reverse().map((e) => (
@@ -156,7 +156,7 @@ export function ImpactLog({ events }) {
 export function Sources() {
   return (
     <section className="panel" aria-labelledby="h-src">
-      <h3 id="h-src">What is sourced and what is a lab choice</h3>
+      <h3 id="h-src"><span className="step-num" aria-hidden="true">4</span>What is sourced and what is a lab choice</h3>
       <p className="small"><strong>From Ping&apos;s docs</strong> (<a href="https://docs.pingidentity.com/connectors/p1_authentication_connector.html" target="_blank" rel="noreferrer">PingOne Authentication connector</a>, <a href="https://docs.pingidentity.com/pingone/applications/p1_edit_application_oidc.html" target="_blank" rel="noreferrer">Editing an application, OIDC</a>): one PingOne user authentication session; Return Success Response (redirect and widget) creates it; Authentication Methods are values the flow sets (pwd by default, mfa, otp, sms, rba, custom); Check Session requires one method signed on within a window; Delete Session signs out and, with Soft Delete, keeps the record; the default idle timeout is 30 days and a shorter one is set on the Return Success Response node; OIDC session management (<code>session_state</code>) needs a custom domain and works only between apps in the same browsing mode; <code>/idpSignoff</code> can end a session from the ID token alone.</p>
       <p className="small"><strong>From the owner-supplied guide and write-up:</strong> the session, cookie, sessionToken, SDK token and OIDC tokens are separate; a widget reuses the session by POSTing <code>global.sessionToken</code>; each method keeps its own last sign-on time and the idle window slides on every Return Success Response; reporting a method that did not happen makes SSO sticky; a null method with no existing session cannot create the cookie.</p>
       <p className="small"><strong>Lab choices (UNVERIFIED as product behaviour):</strong> cookie flags, host and token names; the 8-hour payments rule (a policy window the admin sets); the 60 s to 30 day limits on the controls; an idle-timeout change also applying to a live session; whether a refresh token is bound to the session (the OIDC app page gives refresh durations only: 30 days, 180 days rolling); the idle window also sliding on SSO through an app; and redirect apps receiving tokens directly (a real redirect flow returns a code through the browser).</p>

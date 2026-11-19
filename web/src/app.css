@@ -30,7 +30,10 @@ button.link { min-height: 0; padding: 0; border: 0; background: none; color: var
 .react-flow__edge-text { fill: var(--text); font-size: 11px; } .react-flow__edge-textbg { fill: var(--surface); }
 .panel, .step, .card { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 0.75rem 1rem; margin: 0.75rem 0; }
 .step--active { border-color: var(--status-info); box-shadow: 0 0 0 2px var(--status-info); }
-.cols { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); align-items: start; }
+.cols { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; align-items: start; }
+@media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+.step-num { display: inline-grid; place-items: center; min-width: 1.4rem; height: 1.4rem; border-radius: 999px;
+  background: var(--accent-gradient); color: var(--on-accent); font: 700 0.75rem var(--font-mono); margin-right: 0.5em; vertical-align: 2px; }
 .cards { display: grid; gap: 0.75rem; } .card { margin: 0; background: var(--bg); }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 0.75rem; margin: 0; } .kv dt { color: var(--muted); } .kv dd { margin: 0; min-width: 0; }
 code, pre { font-size: 0.82rem; } pre { margin: 0.25rem 0; }
