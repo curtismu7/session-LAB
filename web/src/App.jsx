@@ -147,7 +147,7 @@ export default function App() {
           <div>
             <CookiePanel lab={lab} onSignIn={(methods) => run("sign-in", { persona, methods })} persona={persona} setPersona={setPersona} />
             <section className="panel" aria-labelledby="h-apps">
-              <h3 id="h-apps">Apps and the tokens they hold</h3>
+              <h3 id="h-apps"><span className="step-num" aria-hidden="true">1</span>Apps and the tokens they hold</h3>
               <div className="cards">{lab.apps.map((a) => <AppCard key={a.id} app={a} name={nameOf(a)} run={run} widgetHasToken={widgetToken} persona={persona} />)}</div>
             </section>
           </div>
@@ -156,7 +156,7 @@ export default function App() {
             <ImpactLog events={lab.events} />
             <Sources />
             <section className="panel" aria-labelledby="h-talk">
-              <h3 id="h-talk">Talk track</h3>
+              <h3 id="h-talk"><span className="step-num" aria-hidden="true">2</span>Talk track</h3>
               <ol>{steps.map((s, i) => <li key={s.title}><button className="link" onClick={() => dispatch({ type: "goto", step: i })}>{s.title}</button>: {s.what}</li>)}</ol>
             </section>
           </div>
