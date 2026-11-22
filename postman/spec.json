@@ -1,0 +1,149 @@
+{
+  "name": "Session LAB",
+  "slug": "session-lab",
+  "description": "API collection for Session LAB: the PingFederate session story against in-process mocks. Sign in at the mock IdP (the cookie chains automatically in Postman/newman), authorize a redirect app, complete MFA, call an API, use the embedded widget, drop the session token and watch the Check-Session consequences, and inspect the flow reports. Every token is a labelled mock; the lab has no live mode.",
+  "baseUrl": "http://localhost:6890",
+  "env": {},
+  "folders": [
+    {
+      "name": "Sanity (mock, labelled)",
+      "description": "Health, mode info and the story catalog (personas and apps).",
+      "requests": [
+        {
+          "name": "Health",
+          "method": "GET",
+          "path": "/api/health",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().state).to.eql('ready');"
+          ]
+        },
+        {
+          "name": "Info",
+          "method": "GET",
+          "path": "/api/info",
+          "tests": [
+            "pm.response.to.have.status(200);"
+          ]
+        },
+        {
+          "name": "Story (cast and verticals)",
+          "method": "GET",
+          "path": "/api/story",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().cast).to.have.property('member');"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "The session journey (cookie chains across requests)",
+      "description": "Sign in creates the PingOne session cookie; authorize, complete-mfa and call-api use it (Postman/newman keep the cookie jar). The widget uses its own session token. lab/flow-reports reads the session report.",
+      "requests": [
+        {
+          "name": "Sign in at the IdP (persona alex, pwd)",
+          "method": "POST",
+          "path": "/api/lab/sign-in",
+          "body": {
+            "persona": "alex",
+            "methods": [
+              "pwd"
+            ]
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().result.ok).to.eql(true);"
+          ]
+        },
+        {
+          "name": "Sign in with an unknown persona (negative)",
+          "method": "POST",
+          "path": "/api/lab/sign-in",
+          "body": {
+            "persona": "nobody"
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().result.ok).to.eql(false);",
+            "pm.expect(pm.response.json().result.error).to.eql('unknown_persona');"
+          ]
+        },
+        {
+          "name": "Authorize the portal app (session cookie)",
+          "method": "POST",
+          "path": "/api/lab/authorize",
+          "body": {
+            "app": "portal"
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().result.ok).to.eql(true);"
+          ]
+        },
+        {
+          "name": "Complete MFA",
+          "method": "POST",
+          "path": "/api/lab/complete-mfa",
+          "body": {},
+          "tests": [
+            "pm.response.to.have.status(200);"
+          ]
+        },
+        {
+          "name": "Call the portal API",
+          "method": "POST",
+          "path": "/api/lab/call-api",
+          "body": {
+            "app": "portal"
+          },
+          "tests": [
+            "pm.response.to.have.status(200);"
+          ]
+        },
+        {
+          "name": "Widget sign-in",
+          "method": "POST",
+          "path": "/api/lab/widget/sign-in",
+          "body": {
+            "persona": "alex",
+            "methods": [
+              "pwd"
+            ]
+          },
+          "tests": [
+            "pm.response.to.have.status(200);"
+          ]
+        },
+        {
+          "name": "Flow reports",
+          "method": "POST",
+          "path": "/api/lab/admin/flow-reports",
+          "body": {},
+          "tests": [
+            "pm.response.to.have.status(200);"
+          ]
+        },
+        {
+          "name": "Unknown action (negative)",
+          "method": "POST",
+          "path": "/api/lab/no-such-action",
+          "body": {},
+          "tests": [
+            "pm.expect(pm.response.code).to.eql(404);",
+            "pm.expect(pm.response.json().error).to.eql('unknown_action');"
+          ]
+        },
+        {
+          "name": "Reset the lab",
+          "method": "POST",
+          "path": "/api/lab/reset",
+          "body": {},
+          "tests": [
+            "pm.response.to.have.status(200);"
+          ]
+        }
+      ]
+    }
+  ]
+}

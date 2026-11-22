@@ -1,0 +1,499 @@
+{
+  "info": {
+    "name": "Session LAB",
+    "description": "API collection for Session LAB: the PingFederate session story against in-process mocks. Sign in at the mock IdP (the cookie chains automatically in Postman/newman), authorize a redirect app, complete MFA, call an API, use the embedded widget, drop the session token and watch the Check-Session consequences, and inspect the flow reports. Every token is a labelled mock; the lab has no live mode.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "e4686e02-2818-487c-b5ef-ec817fc06354"
+  },
+  "item": [
+    {
+      "name": "Sanity (mock, labelled)",
+      "description": "Health, mode info and the story catalog (personas and apps).",
+      "item": [
+        {
+          "name": "Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().state).to.eql('ready');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/health",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/info",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "info"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Story (cast and verticals)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().cast).to.have.property('member');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/story",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "story"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "The session journey (cookie chains across requests)",
+      "description": "Sign in creates the PingOne session cookie; authorize, complete-mfa and call-api use it (Postman/newman keep the cookie jar). The widget uses its own session token. lab/flow-reports reads the session report.",
+      "item": [
+        {
+          "name": "Sign in at the IdP (persona alex, pwd)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().result.ok).to.eql(true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"persona\": \"alex\",\n  \"methods\": [\n    \"pwd\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/sign-in",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "sign-in"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Sign in with an unknown persona (negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().result.ok).to.eql(false);",
+                  "pm.expect(pm.response.json().result.error).to.eql('unknown_persona');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"persona\": \"nobody\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/sign-in",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "sign-in"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Authorize the portal app (session cookie)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().result.ok).to.eql(true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"app\": \"portal\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/authorize",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "authorize"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Complete MFA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/complete-mfa",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "complete-mfa"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Call the portal API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"app\": \"portal\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/call-api",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "call-api"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Widget sign-in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"persona\": \"alex\",\n  \"methods\": [\n    \"pwd\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/widget/sign-in",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "widget",
+                "sign-in"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Flow reports",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/admin/flow-reports",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "admin",
+                "flow-reports"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Unknown action (negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.expect(pm.response.code).to.eql(404);",
+                  "pm.expect(pm.response.json().error).to.eql('unknown_action');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/no-such-action",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "no-such-action"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Reset the lab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/api/lab/reset",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "lab",
+                "reset"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "LAB_BASE",
+      "value": "http://localhost:6890"
+    }
+  ]
+}
