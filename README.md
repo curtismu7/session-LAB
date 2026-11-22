@@ -26,6 +26,15 @@ PORT=6890 node server/src/index.js
 
 Open http://127.0.0.1:6890/ (or `./scripts/run.sh`). Everything works in mock mode with no setup: no settings file, no account, no network.
 
+### Postman
+
+`postman/session-lab.postman_collection.json` drives the journey without the UI: sign-in at the mock IdP (the session cookie chains automatically in Postman/newman), authorize the portal app, complete MFA, call the API, widget sign-in, the admin flow reports, the unknown-persona and unknown-action negatives, and reset. No environment needed — every token is a labelled mock.
+
+```
+node ../../shared/postman/generator.mjs --spec postman/spec.json            # regenerate (never hand-edit the output)
+npx newman run postman/session-lab.postman_collection.json
+```
+
 ## Settings file
 
 This app needs no settings. It reads an optional `.env` in the repo root (git-ignored). It does not read the shared `~/Development/.env`. All keys are optional:
