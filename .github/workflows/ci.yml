@@ -110,3 +110,24 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:6898/api/health >/dev/null && { ready=1; break; }; sleep 1; done
           [ "$ready" = 1 ] || { echo "server did not start"; cat "$RUNNER_TEMP/server.log"; exit 1; }
           E2E_URL=http://127.0.0.1:6898/ PLAYWRIGHT_DIR="$RUNNER_TEMP/pw" E2E_SHOTS="$RUNNER_TEMP" node e2e/session-lab.e2e.mjs
+
+
+  postman:
+    # The Postman collection against the lab's own server: boots on a spare
+    # port, runs newman with the committed placeholder environment, fails on
+    # any assertion. Regenerate with shared/postman/generator.mjs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check out the family shared directory
+        uses: actions/checkout@v5
+        with:
+          repository: curtismu7/AI-DEMO-Standalone
+          ref: main
+          path: family
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: ls family/shared/postman && bash family/shared/postman/ci-check.sh session-lab /api/health npm start
