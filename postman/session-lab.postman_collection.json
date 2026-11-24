@@ -3,7 +3,7 @@
     "name": "Session LAB",
     "description": "API collection for Session LAB: the PingFederate session story against in-process mocks. Sign in at the mock IdP (the cookie chains automatically in Postman/newman), authorize a redirect app, complete MFA, call an API, use the embedded widget, drop the session token and watch the Check-Session consequences, and inspect the flow reports. Every token is a labelled mock; the lab has no live mode.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_postman_id": "e4686e02-2818-487c-b5ef-ec817fc06354"
+    "_postman_id": "postman-session-lab"
   },
   "item": [
     {
@@ -18,9 +18,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().state).to.eql('ready');"
+                  "pm.test(\"Health\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().state).to.eql('ready');",
+                  "});"
                 ]
               }
             }
@@ -50,8 +51,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);"
+                  "pm.test(\"Info\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -81,9 +83,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().cast).to.have.property('member');"
+                  "pm.test(\"Story (cast and verticals)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().cast).to.have.property('member');",
+                  "});"
                 ]
               }
             }
@@ -119,9 +122,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().result.ok).to.eql(true);"
+                  "pm.test(\"Sign in at the IdP (persona alex, pwd)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().result.ok).to.eql(true);",
+                  "});"
                 ]
               }
             }
@@ -161,10 +165,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().result.ok).to.eql(false);",
-                  "pm.expect(pm.response.json().result.error).to.eql('unknown_persona');"
+                  "pm.test(\"Sign in with an unknown persona (negative)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().result.ok).to.eql(false);",
+                  "  pm.expect(pm.response.json().result.error).to.eql('unknown_persona');",
+                  "});"
                 ]
               }
             }
@@ -204,9 +209,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().result.ok).to.eql(true);"
+                  "pm.test(\"Authorize the portal app (session cookie)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().result.ok).to.eql(true);",
+                  "});"
                 ]
               }
             }
@@ -246,8 +252,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);"
+                  "pm.test(\"Complete MFA\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -287,8 +294,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);"
+                  "pm.test(\"Call the portal API\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -328,8 +336,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);"
+                  "pm.test(\"Widget sign-in\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -370,8 +379,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);"
+                  "pm.test(\"Flow reports\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -412,9 +422,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.expect(pm.response.code).to.eql(404);",
-                  "pm.expect(pm.response.json().error).to.eql('unknown_action');"
+                  "pm.test(\"Unknown action (negative)\", function () {",
+                  "  pm.expect(pm.response.code).to.eql(404);",
+                  "  pm.expect(pm.response.json().error).to.eql('unknown_action');",
+                  "});"
                 ]
               }
             }
@@ -454,8 +465,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);"
+                  "pm.test(\"Reset the lab\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }

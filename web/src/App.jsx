@@ -120,6 +120,7 @@ export default function App() {
           present={{ active: present, onToggle: () => setPresent((p) => !p), label: "Presenter mode" }}
           talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
           help={{ href: "https://github.com/curtismu7/session-LAB#readme" }}
+          postman={{ repo: "curtismu7/session-LAB", slug: "session-lab" }}
           version={info?.version || null}
           onReset={reset}
         >
